@@ -1,93 +1,105 @@
-# Vitro — YouTube em vidro
+# Vitro — YouTube in glass
 
-Extensão para Chrome/Brave que deixa o YouTube moderno: barras de vidro flutuantes, seu papel de parede, saudação na home, cartões translúcidos e zero Shorts.
+**English** | [Português](README.pt-BR.md)
 
-![Vitro na home do YouTube](docs/screenshot.jpg)
+A Chrome/Brave extension that makes YouTube feel modern: floating glass bars, your own wallpaper, a greeting on the home page, translucent cards and zero Shorts. Available in **English and Portuguese**.
 
-> 🤖 Projeto *vibecoded*: construído em conversa com o **Claude Opus** (Anthropic) no Claude Code, a partir de prints e da análise de uma extensão de tema que eu usava.
+![Vitro on the YouTube home page](docs/screenshot.jpg)
 
-## Instalar (modo desenvolvedor)
+> 🤖 A *vibecoded* project: built in conversation with **Claude Opus** (Anthropic) in Claude Code, starting from screenshots and an analysis of a theme extension I used to pay for.
 
-1. Abra `chrome://extensions` (ou `brave://extensions`).
-2. Ative **Modo do desenvolvedor** (canto superior direito).
-3. Clique em **Carregar sem compactação** e escolha esta pasta.
-4. Abra o YouTube (de preferência no **tema escuro**) e recarregue a aba.
+## Install (developer mode)
 
-> Desative outras extensões de tema do YouTube enquanto testa; elas brigam pelo mesmo CSS.
+1. Open `chrome://extensions` (or `brave://extensions`).
+2. Turn on **Developer mode** (top right).
+3. Click **Load unpacked** and pick this folder.
+4. Open YouTube (preferably in the **dark theme**) and reload the tab.
 
-Depois de editar o código, clique em ↻ no card da extensão e recarregue a aba do YouTube.
+> Disable other YouTube theme extensions while testing; they fight over the same CSS.
 
-## O que faz
+After editing the code, click ↻ on the extension card and reload the YouTube tab.
 
-| Área | Recursos |
+## Features
+
+| Area | What it does |
 |---|---|
-| **Vidro** | Barra superior em pílula flutuante, menu lateral e mini-menu em painéis de vidro. Estilos Vidro / Fosco / Sólido, desfoque e transparência ajustáveis. |
-| **Fundo** | 11 papéis de parede em imagem (padrão: **Brasa**) + 6 cenas em SVG gerado, ou sua própria imagem. Escurecer e desfoque. |
-| **Destaque** | Saudação por horário ("Bom dia / Boa tarde / Boa noite") com data, seu nome em cor de destaque, neve opcional. |
-| **Cartões** | Fundo translúcido, cantos de 18px, sombra, animação ao passar o mouse. Título sob/sobre a imagem, tamanho do texto, disposição (Padrão/Ar/Denso), largura do feed, bordas. |
-| **Luz** | Halo que segue o cursor sobre o papel de parede, com escuridão ao redor. |
-| **Página de vídeo** | "Sala de cinema": o fundo vira o próprio vídeo desfocado; descrição e comentários em painéis de vidro. |
-| **Limpeza** | Sem Shorts (inclusive redireciona `/shorts/ID` para `/watch?v=ID`), anúncios escondidos e pulados, recomendados opcionais, sem telas finais, sem merch. |
+| **Glass** | Floating pill-shaped top bar, sidebar and mini sidebar as glass panels. Glass / Frosted / Solid styles, adjustable blur and transparency. |
+| **Background** | 11 image wallpapers (default: **Ember**) + 6 generated SVG scenes, or your own image. Dim and blur controls. |
+| **Highlight** | Time-based greeting ("Good morning / Good afternoon / Good evening") with the date, your name in an accent color, optional snow. |
+| **Cards** | Translucent background, 18px corners, shadow, hover animation. Title below/over the thumbnail, text size, layout (Default/Airy/Dense), feed width, borders. |
+| **Light** | A glow that follows the cursor over the wallpaper, with darkness around it. |
+| **Video page** | "Movie theater": the background becomes the video itself, blurred; description and comments sit in glass panels. |
+| **Cleanup** | No Shorts (also redirects `/shorts/ID` to `/watch?v=ID`), hidden and skipped ads, optional recommendations, no end screens, no merch. |
+| **Language** | English and Portuguese. Follows the browser language or can be picked in the popup. |
 
-## Como usar
+## Usage
 
-- Clique no **raio** ⚡ na barra superior do YouTube para abrir o editor visual. Escolha a área (Fundo, Destaque, Saudação…) e ajuste ao vivo. `Esc` ou **Pronto** fecha.
-![Editor visual com o painel Fundo aberto](docs/editor.jpg)
+- Click the **lightning bolt** ⚡ in YouTube's top bar to open the visual editor. Pick an area (Background, Highlight, Greeting…) and tweak it live. `Esc` or **Done** closes it.
 
-- O ícone da extensão abre um popup com os interruptores principais.
-- Configurações ficam em `chrome.storage.sync` (seguem sua conta); a imagem própria fica em `chrome.storage.local`.
+![Visual editor with the Background panel open](docs/editor.jpg)
 
-## Versões
+- The extension icon opens a popup with the main switches and the **Language** selector (Automatic / English / Português).
+- Settings live in `chrome.storage.sync` (they follow your account); your own image lives in `chrome.storage.local`.
 
-A versão atual fica no `manifest.json` (aparece no popup e em `brave://extensions`) e o histórico no [CHANGELOG.md](CHANGELOG.md). Cada versão lançada tem uma tag git `vX.Y.Z`.
+## Languages
 
-Fluxo para lançar:
+- Extension strings live in `src/i18n.js` (`en` and `pt` objects with the same keys). The extension name and description live in `_locales/` (Chrome's standard).
+- **Automatic** uses `pt` when the browser is set to any Portuguese variant and `en` otherwise.
+- To add a language: add a new object in `src/i18n.js`, update `vitroLang`/`vitroLocale`, add the option to the `<select>` in `popup/popup.html`, and add a folder under `_locales/`.
 
-1. Anote as mudanças na seção `## [Não lançado]` do `CHANGELOG.md` e commite.
-2. Rode o script com o tipo da mudança:
+## Versions
+
+The current version lives in `manifest.json` (shown in the popup and in `brave://extensions`), and the history in [CHANGELOG.md](CHANGELOG.md) (in Portuguese). Every release has a GPG-signed git tag `vX.Y.Z`.
+
+Release flow:
+
+1. Write the changes under `## [Não lançado]` (Unreleased) in `CHANGELOG.md` and commit.
+2. Run the script with the kind of change:
 
 ```sh
-scripts/release.sh patch   # correção        1.1.0 → 1.1.1
-scripts/release.sh minor   # recurso novo    1.1.0 → 1.2.0
-scripts/release.sh major   # quebra config.  1.1.0 → 2.0.0
-scripts/release.sh zip     # só gera dist/vitro-vX.Y.Z.zip da versão atual
+scripts/release.sh patch   # bug fix          1.2.0 → 1.2.1
+scripts/release.sh minor   # new feature      1.2.0 → 1.3.0
+scripts/release.sh major   # breaks settings  1.2.0 → 2.0.0
+scripts/release.sh zip     # only builds dist/vitro-vX.Y.Z.zip for the current version
 ```
 
-O script sobe a versão no manifest, fecha a seção do changelog com a data, cria o commit `release: vX.Y.Z`, a tag e o `.zip` em `dist/` (fora do git).
+The script bumps the manifest version, closes the changelog section with the date, creates the `release: vX.Y.Z` commit, the tag, and the `.zip` in `dist/` (git-ignored).
 
-## Estrutura
+## Project layout
 
 ```
 manifest.json        MV3
-src/settings.js      padrões + load/save
-src/wallpapers.js    lista de papéis de parede (imagens + SVG gerado)
-wallpapers/          imagens originais (fonte)
-assets/wallpapers/   imagens otimizadas usadas pela extensão (2560px, JPEG)
-assets/thumbs/       miniaturas do editor
-docs/                imagens do README
-src/content.js       classes no <html>, camadas de fundo, saudação, sala, editor, pulo de anúncio
-src/vitro.css        todo o visual (escopado em html.vt-*)
-popup/               popup da extensão
-scripts/release.sh   versionamento (bump + tag + zip)
-CHANGELOG.md         histórico de versões
-icons/               ícone (SVG → PNG via rsvg-convert)
+_locales/            extension name and description (en, pt_BR)
+src/settings.js      defaults + load/save
+src/i18n.js          EN/PT dictionary and language selection
+src/wallpapers.js    wallpaper list (images + generated SVG)
+src/content.js       <html> classes, background layers, greeting, theater, editor, ad skipping
+src/vitro.css        all the styling (scoped under html.vt-*)
+popup/               extension popup
+wallpapers/          original images (source)
+assets/wallpapers/   optimized images used by the extension (2560px, JPEG)
+assets/thumbs/       editor thumbnails
+docs/                README images
+scripts/release.sh   versioning (bump + tag + zip)
+CHANGELOG.md         version history
+icons/               icon (SVG → PNG via rsvg-convert)
 ```
 
-## Papéis de parede
+## Wallpapers
 
-Brasa, Rubi, Lampejo, Anil, Neon azul, Oceano, Prisma, Fluxo, Amanhecer, Lua nascente e Eclipse, além das cenas em SVG Cor, Ondas, Crepúsculo, Noite, Inverno e Aurora.
+Ember, Ruby, Flash, Indigo, Blue neon, Ocean, Prism, Flow, Dawn, Moonrise and Eclipse, plus the SVG scenes Color, Waves, Dusk, Night, Winter and Aurora. (Their file ids are in Portuguese: `brasa`, `rubi`, `lampejo`, `anil`, `neon-azul`, `oceano`, `prisma`, `fluxo`, `amanhecer`, `lua-nascente`, `eclipse`.)
 
-Para adicionar um novo: coloque a imagem em `wallpapers/`, gere as versões otimizadas e registre o id em `IMAGES` dentro de `src/wallpapers.js`:
+To add one: drop the image in `wallpapers/`, build the optimized versions, register the id in `IMAGES` inside `src/wallpapers.js`, and add its name as `wall.<id>` in both languages in `src/i18n.js`:
 
 ```sh
-n=meu-fundo
+n=my-wallpaper
 magick wallpapers/$n.png -resize '2560x2560>' -strip -quality 82 assets/wallpapers/$n.jpg
 magick wallpapers/$n.png -resize 240x135^ -gravity center -extent 240x135 -strip -quality 75 assets/thumbs/$n.jpg
 ```
 
-"Oceano" é uma foto de Richard Horvath no [Unsplash](https://unsplash.com/).
+"Ocean" is a photo by Richard Horvath on [Unsplash](https://unsplash.com/).
 
-## Limitações
+## Limitations
 
-- O bloqueio de anúncios é cosmético + pula/acelera o anúncio em vídeo. Não é um bloqueador de rede como o uBlock Origin; use os dois juntos se quiser.
-- O YouTube muda o DOM com frequência. Se algo quebrar, os seletores estão concentrados em `src/vitro.css`.
+- Ad blocking is cosmetic, plus skipping/fast-forwarding video ads. It is not a network blocker like uBlock Origin; use both together if you want.
+- YouTube changes its DOM often. If something breaks, the selectors are concentrated in `src/vitro.css`.

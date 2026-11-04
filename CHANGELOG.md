@@ -9,6 +9,14 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Adicionado
+- Extensão em inglês e português: dicionário próprio em `src/i18n.js` e nome/descrição traduzidos em `_locales/`.
+- Seletor de idioma no popup (Automático / English / Português); o editor e a saudação trocam na hora.
+- README em inglês (`README.md`) e em português (`README.pt-BR.md`), com links de troca.
+
+### Alterado
+- `scripts/release.sh` inclui `_locales/` no zip.
+
 ## [1.1.0] - 2026-11-04
 
 ### Adicionado

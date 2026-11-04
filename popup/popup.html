@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Vitro</title>
@@ -10,33 +10,43 @@
       <img src="../icons/icon48.png" alt="" width="32" height="32" />
       <div>
         <h1>Vitro</h1>
-        <p>YouTube em vidro · <span id="version"></span></p>
+        <p><span data-i18n="popup.tagline"></span> · <span id="version"></span></p>
       </div>
-      <button class="switch" data-key="enabled" role="switch" aria-label="Ativar Vitro"></button>
+      <button class="switch" data-key="enabled" role="switch" data-i18n-aria="popup.toggle"></button>
     </header>
 
-    <button id="edit" class="primary">Personalizar aparência…</button>
+    <button id="edit" class="primary" data-i18n="popup.edit"></button>
 
     <section>
-      <h2>Limpeza</h2>
-      <label>Esconder Shorts <button class="switch" data-key="hideShorts" role="switch"></button></label>
-      <label>Bloquear anúncios <button class="switch" data-key="blockAds" role="switch"></button></label>
-      <label>Esconder recomendados no vídeo <button class="switch" data-key="hideRelated" role="switch"></button></label>
-      <label>Esconder telas finais <button class="switch" data-key="hideEndscreens" role="switch"></button></label>
-      <label>Esconder produtos/merch <button class="switch" data-key="hideMerch" role="switch"></button></label>
+      <h2 data-i18n="popup.cleanup"></h2>
+      <label><span data-i18n="opt.hideShorts"></span> <button class="switch" data-key="hideShorts" role="switch"></button></label>
+      <label><span data-i18n="opt.blockAds"></span> <button class="switch" data-key="blockAds" role="switch"></button></label>
+      <label><span data-i18n="popup.hideRelated"></span> <button class="switch" data-key="hideRelated" role="switch"></button></label>
+      <label><span data-i18n="opt.hideEndscreens"></span> <button class="switch" data-key="hideEndscreens" role="switch"></button></label>
+      <label><span data-i18n="opt.hideMerch"></span> <button class="switch" data-key="hideMerch" role="switch"></button></label>
     </section>
 
     <section>
-      <h2>Aparência</h2>
-      <label>Saudação na home <button class="switch" data-key="hero" role="switch"></button></label>
-      <label>Cartões de vidro <button class="switch" data-key="cards" role="switch"></button></label>
-      <label>Luz do cursor <button class="switch" data-key="light" role="switch"></button></label>
-      <label>Sala de cinema no vídeo <button class="switch" data-key="room" role="switch"></button></label>
+      <h2 data-i18n="popup.appearance"></h2>
+      <label><span data-i18n="popup.hero"></span> <button class="switch" data-key="hero" role="switch"></button></label>
+      <label><span data-i18n="popup.cards"></span> <button class="switch" data-key="cards" role="switch"></button></label>
+      <label><span data-i18n="popup.light"></span> <button class="switch" data-key="light" role="switch"></button></label>
+      <label><span data-i18n="popup.room"></span> <button class="switch" data-key="room" role="switch"></button></label>
     </section>
 
-    <footer><button id="reset" class="link">Restaurar padrões</button></footer>
+    <section>
+      <h2 data-i18n="popup.language"></h2>
+      <select id="language" data-i18n-aria="popup.language">
+        <option value="auto" data-i18n="popup.lang.auto"></option>
+        <option value="en">English</option>
+        <option value="pt">Português</option>
+      </select>
+    </section>
+
+    <footer><button id="reset" class="link" data-i18n="popup.reset"></button></footer>
 
     <script src="../src/settings.js"></script>
+    <script src="../src/i18n.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

@@ -14,7 +14,7 @@ package() {
   local v=$1 out="dist/vitro-v$1.zip"
   mkdir -p dist
   rm -f "$out"
-  zip -qr "$out" manifest.json src popup icons assets -x '*.DS_Store'
+  zip -qr "$out" manifest.json _locales src popup icons assets -x '*.DS_Store'
   echo "Pacote: $out ($(du -h "$out" | cut -f1))"
 }
 

@@ -4,6 +4,8 @@
   const WALLS = globalThis.VITRO_WALLPAPERS;
   let S = { ...globalThis.VITRO_DEFAULTS };
   let customImage = null;
+  const t = (k) => globalThis.vitroT(k);
+  let currentLang = null;
 
   // ---------------------------------------------------------------------
   // Shorts → vídeo normal (antes de qualquer render)
@@ -23,6 +25,9 @@
 
   function applySettings() {
     const on = S.enabled;
+    const lang = globalThis.vitroSetLang(S.language);
+    if (currentLang && lang !== currentLang) onLanguageChange();
+    currentLang = lang;
     setClass("vt-on", on);
     setClass("vt-no-shorts", on && S.hideShorts);
     setClass("vt-no-ads", on && S.blockAds);
@@ -200,10 +205,10 @@
   let hero;
   function greeting() {
     const h = new Date().getHours();
-    if (h < 5) return "Boa noite,";
-    if (h < 12) return "Bom dia,";
-    if (h < 18) return "Boa tarde,";
-    return "Boa noite,";
+    if (h < 5) return t("greet.night");
+    if (h < 12) return t("greet.morning");
+    if (h < 18) return t("greet.afternoon");
+    return t("greet.evening");
   }
 
   function heroHeight() {
@@ -223,17 +228,18 @@
       };
       hero.append(
         el("div", "vt-greet", el("div", "vt-date"), el("p", "vt-title", el("b", "vt-hello"), el("span", ""))),
-        el("h2", "vt-section", "Recomendados")
+        el("h2", "vt-section")
       );
     }
     if (!hero.isConnected) document.body.appendChild(hero);
-    hero.querySelector(".vt-date").textContent = new Date().toLocaleDateString("pt-BR", {
+    hero.querySelector(".vt-date").textContent = new Date().toLocaleDateString(globalThis.vitroLocale(), {
       weekday: "long",
       day: "numeric",
       month: "long",
     });
     hero.querySelector(".vt-hello").textContent = greeting();
-    hero.querySelector(".vt-title span").textContent = S.name.trim() || "que bom te ver";
+    hero.querySelector(".vt-title span").textContent = S.name.trim() || t("hero.fallbackName");
+    hero.querySelector(".vt-section").textContent = t("hero.section");
     html.style.setProperty("--vt-hero-h", heroHeight() + "px");
     positionHero();
   }
@@ -319,8 +325,8 @@
     if (!end) return;
     const b = document.createElement("button");
     b.id = "vt-edit-btn";
-    b.title = "Personalizar (Vitro)";
-    b.setAttribute("aria-label", "Personalizar aparência");
+    b.title = t("button.title");
+    b.setAttribute("aria-label", t("button.aria"));
     b.append(boltIcon());
     b.addEventListener("click", () => editor.toggle());
     end.prepend(b);
@@ -388,16 +394,16 @@
     function wallpapers() {
       const items = WALLS.map((w) =>
         h("button", { class: "vt-wall", "aria-pressed": String(S.wallpaper === w.id), onclick: () => set("wallpaper", w.id) },
-          h("i", { style: `background-image:${w.thumb || w.css}` }), w.name));
+          h("i", { style: `background-image:${w.thumb || w.css}` }), t("wall." + w.id)));
       if (customImage)
         items.push(h("button", { class: "vt-wall", "aria-pressed": String(S.wallpaper === "custom"), onclick: () => set("wallpaper", "custom") },
-          h("i", { style: `background-image:url("${customImage}")` }), "Sua imagem"));
+          h("i", { style: `background-image:url("${customImage}")` }), t("wall.custom")));
       const file = h("input", { type: "file", accept: "image/*", style: "display:none", onchange: (e) => loadImage(e.target.files[0]) });
       return [
         h("div", { class: "vt-walls" }, items),
         h("div", { class: "vt-row" },
-          h("button", { class: "vt-btn", onclick: () => file.click() }, "Sua própria imagem…"),
-          customImage && h("button", { class: "vt-btn", onclick: removeImage }, "Remover"), file),
+          h("button", { class: "vt-btn", onclick: () => file.click() }, t("wall.upload")),
+          customImage && h("button", { class: "vt-btn", onclick: removeImage }, t("wall.remove")), file),
       ];
     }
 
@@ -420,61 +426,62 @@
     }
 
     const PANELS = {
-      fundo: { title: "Fundo", body: () => [wallpapers(), slider("Escurecer", "bgDim", 0, 90, "%"), slider("Desfoque", "bgBlur", 0, 40, "px")] },
+      fundo: { body: () => [wallpapers(), slider(t("opt.dim"), "bgDim", 0, 90, "%"), slider(t("opt.blur"), "bgBlur", 0, 40, "px")] },
       destaque: {
-        title: "Destaque", flash: "hero", master: "hero",
-        body: () => [color("Cor de destaque", "accent"), toggle("Neve", "snow")],
+        flash: "hero", master: "hero",
+        body: () => [color(t("opt.accent"), "accent"), toggle(t("opt.snow"), "snow")],
       },
       saudacao: {
-        title: "Saudação", flash: "hero", master: "greet",
-        body: () => [text("Nome", "name", "Como devo te chamar?"), h("p", { class: "vt-hint" }, "Vazio mostra “que bom te ver”.")],
+        flash: "hero", master: "greet",
+        body: () => [text(t("opt.name"), "name", t("opt.namePlaceholder")), h("p", { class: "vt-hint" }, t("hint.name"))],
       },
       menu: {
-        title: "Menu lateral", flash: "guide", master: "sidebarGlass",
-        body: () => [h("p", { class: "vt-hint" }, "Painel de vidro flutuante para o menu lateral e o mini-menu.")],
+        flash: "guide", master: "sidebarGlass",
+        body: () => [h("p", { class: "vt-hint" }, t("hint.sidebar"))],
       },
       cartoes: {
-        title: "Cartões", master: "cards",
+        master: "cards",
         body: () => [
-          seg("Título", "cardTitle", [["below", "Sob a imagem"], ["over", "Sobre a imagem"]]),
-          slider("Tamanho do texto", "cardText", 80, 130, "%"),
-          seg("Disposição", "cardLayout", [["default", "Padrão"], ["air", "Ar"], ["dense", "Denso"]]),
-          slider("Largura do feed", "feedWidth", 60, 100, "%"),
-          toggle("Bordas", "cardBorders"),
+          seg(t("opt.cardTitle"), "cardTitle", [["below", t("opt.cardTitle.below")], ["over", t("opt.cardTitle.over")]]),
+          slider(t("opt.cardText"), "cardText", 80, 130, "%"),
+          seg(t("opt.cardLayout"), "cardLayout", [["default", t("opt.cardLayout.default")], ["air", t("opt.cardLayout.air")], ["dense", t("opt.cardLayout.dense")]]),
+          slider(t("opt.feedWidth"), "feedWidth", 60, 100, "%"),
+          toggle(t("opt.borders"), "cardBorders"),
         ],
       },
-      luz: { title: "Luz", master: "light", body: () => [color("Cor", "lightColor"), slider("Escuridão em volta", "lightDark", 0, 70, "%")] },
+      luz: { master: "light", body: () => [color(t("opt.color"), "lightColor"), slider(t("opt.lightDark"), "lightDark", 0, 70, "%")] },
       vidro: {
-        title: "Vidro", flash: "masthead",
+        flash: "masthead",
         body: () => [
-          seg("Barras e painéis", "glassStyle", [["glass", "Vidro"], ["frost", "Fosco"], ["solid", "Sólido"]]),
-          slider("Desfoque", "glassBlur", 0, 40, "px"),
-          slider("Transparência", "glassAlpha", 10, 90, "%"),
+          seg(t("opt.glassStyle"), "glassStyle", [["glass", t("opt.glassStyle.glass")], ["frost", t("opt.glassStyle.frost")], ["solid", t("opt.glassStyle.solid")]]),
+          slider(t("opt.blur"), "glassBlur", 0, 40, "px"),
+          slider(t("opt.transparency"), "glassAlpha", 10, 90, "%"),
         ],
       },
-      video: { title: "Página de vídeo", master: "room", body: () => [h("p", { class: "vt-hint" }, "O fundo vira o próprio vídeo, desfocado — como uma sala de cinema."), toggle("Esconder recomendados", "hideRelated")] },
+      video: { master: "room", body: () => [h("p", { class: "vt-hint" }, t("hint.room")), toggle(t("opt.hideRelated"), "hideRelated")] },
       limpeza: {
-        title: "Limpeza",
-        body: () => [toggle("Esconder Shorts", "hideShorts"), toggle("Bloquear anúncios", "blockAds"), toggle("Esconder telas finais", "hideEndscreens"), toggle("Esconder produtos/merch", "hideMerch")],
+        body: () => [toggle(t("opt.hideShorts"), "hideShorts"), toggle(t("opt.blockAds"), "blockAds"), toggle(t("opt.hideEndscreens"), "hideEndscreens"), toggle(t("opt.hideMerch"), "hideMerch")],
       },
     };
 
+    const title = (id) => t("panel." + id);
+
     function build() {
       if (bar?.isConnected) return;
-      bar = h("div", { id: "vt-editor", role: "toolbar", "aria-label": "Editor do Vitro" },
-        h("span", { class: "vt-ed-label" }, "Clique no que quer mudar"),
-        Object.entries(PANELS).map(([id, p]) =>
-          h("button", { class: "vt-tab", "data-id": id, "aria-pressed": "false", onclick: () => openPanel(id) }, p.title)),
-        h("button", { class: "vt-done", onclick: () => close() }, "Pronto"));
+      bar = h("div", { id: "vt-editor", role: "toolbar", "aria-label": t("editor.aria") },
+        h("span", { class: "vt-ed-label" }, t("editor.hint")),
+        Object.keys(PANELS).map((id) =>
+          h("button", { class: "vt-tab", "data-id": id, "aria-pressed": "false", onclick: () => openPanel(id) }, title(id))),
+        h("button", { class: "vt-done", onclick: () => close() }, t("editor.done")));
       panel = h("div", { id: "vt-panel", role: "dialog" });
       document.body.append(bar, panel);
     }
 
     function renderPanel(id) {
       const p = PANELS[id];
-      const head = h("div", { class: "vt-head" }, h("h3", {}, p.title),
-        p.master && h("button", { class: "vt-switch", role: "switch", "aria-checked": String(!!S[p.master]), "aria-label": "Ativar " + p.title, onclick: () => set(p.master, !S[p.master]) }),
-        h("button", { class: "vt-x", "aria-label": "Fechar", onclick: () => openPanel(null) }, "✕"));
+      const head = h("div", { class: "vt-head" }, h("h3", {}, title(id)),
+        p.master && h("button", { class: "vt-switch", role: "switch", "aria-checked": String(!!S[p.master]), "aria-label": t("editor.enable") + " " + title(id), onclick: () => set(p.master, !S[p.master]) }),
+        h("button", { class: "vt-x", "aria-label": t("editor.close"), onclick: () => openPanel(null) }, "✕"));
       // preserva o foco em campos de texto ao re-renderizar
       const active = document.activeElement;
       if (panel.contains(active) && active.type === "text") return;
@@ -505,12 +512,37 @@
       openPanel(null);
       setClass("vt-editing", false);
     }
+    // Troca de idioma: recria a barra e reabre o painel atual, se houver
+    function relabel() {
+      if (!bar) return;
+      const wasOpen = html.classList.contains("vt-editing");
+      const last = current;
+      bar.remove();
+      panel.remove();
+      current = null;
+      bar = null;
+      if (wasOpen) {
+        build();
+        if (last) openPanel(last);
+      }
+    }
     return {
+      relabel,
       toggle: () => (html.classList.contains("vt-editing") ? close() : open()),
       open,
       close,
     };
   })();
+
+  function onLanguageChange() {
+    editor.relabel();
+    const b = document.getElementById("vt-edit-btn");
+    if (b) {
+      b.title = t("button.title");
+      b.setAttribute("aria-label", t("button.aria"));
+    }
+    // updateHero() roda logo depois, dentro de applySettings()
+  }
 
   addEventListener("keydown", (e) => {
     if (e.key === "Escape" && html.classList.contains("vt-editing")) editor.close();

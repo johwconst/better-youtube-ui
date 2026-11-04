@@ -98,6 +98,21 @@ button {
 .switch[aria-checked="true"]::after {
   transform: translateX(14px);
 }
+select {
+  width: 100%;
+  margin-top: 4px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
 footer {
   text-align: center;
   margin-top: 10px;

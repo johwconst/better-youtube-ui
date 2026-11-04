@@ -1,6 +1,7 @@
 // Configurações compartilhadas entre content script e popup.
 globalThis.VITRO_DEFAULTS = {
   enabled: true,
+  language: "auto", // auto | en | pt
 
   // Limpeza
   hideShorts: true,
