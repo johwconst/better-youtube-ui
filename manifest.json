@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "Vitro — YouTube em vidro",
+  "short_name": "Vitro",
+  "version": "1.1.0",
+  "description": "Deixa o YouTube moderno: vidro, seu papel de parede, saudação, e zero Shorts.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "storage",
+    "unlimitedStorage"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/wallpapers/*",
+        "assets/thumbs/*"
+      ],
+      "matches": [
+        "*://www.youtube.com/*"
+      ]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://www.youtube.com/*"
+      ],
+      "css": [
+        "src/vitro.css"
+      ],
+      "js": [
+        "src/settings.js",
+        "src/wallpapers.js",
+        "src/content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ]
+}

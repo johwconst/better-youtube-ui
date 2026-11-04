@@ -1,0 +1,821 @@
+/* =========================================================================
+   Vitro — YouTube em vidro
+   Todas as regras são escopadas em classes "vt-*" no <html>, aplicadas
+   pelo content.js. Sem as classes, o YouTube fica intacto.
+   ========================================================================= */
+
+/* Variáveis do Vitro: só no <html> (o content.js sobrescreve inline lá).
+   Não repetir no ytd-app, senão os padrões anulam os ajustes do editor. */
+html.vt-on {
+  --vt-accent: #ff7373;
+  --vt-glass-alpha: 0.48;
+  --vt-blur: 14px;
+  --vt-glass-bg: rgba(15, 15, 15, var(--vt-glass-alpha));
+  --vt-border: rgba(241, 241, 241, 0.15);
+  --vt-card-bg: rgba(241, 241, 241, 0.09);
+  --vt-card-radius: 18px;
+  --vt-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --vt-top: 80px; /* masthead flutuante + respiro */
+  --vt-hero-h: 0px;
+  --vt-feed-w: 100;
+  --vt-card-text: 1;
+}
+
+html.vt-on,
+html.vt-on ytd-app {
+  /* Tokens do YouTube: fundos transparentes para o papel de parede aparecer */
+  --yt-spec-base-background: transparent !important;
+  --yt-spec-general-background-a: transparent !important;
+  --yt-spec-general-background-b: transparent !important;
+  --yt-spec-general-background-c: transparent !important;
+  --yt-sys-color-baseline--base-background: transparent !important;
+  --yt-deprecated-general-background-a: transparent !important;
+  --yt-deprecated-general-background-b: transparent !important;
+  --yt-spec-brand-background-solid: transparent !important;
+  --yt-spec-brand-background-primary: transparent !important;
+  --yt-spec-raised-background: #161616 !important;
+  --yt-spec-menu-background: #1c1c1c !important;
+}
+html.vt-on {
+  background-color: #0f0f0f !important;
+}
+
+html.vt-on body,
+html.vt-on ytd-app,
+html.vt-on #frosted-glass,
+html.vt-on ytd-page-manager,
+html.vt-on ytd-browse,
+html.vt-on ytd-two-column-browse-results-renderer,
+html.vt-on ytd-search,
+html.vt-on ytd-watch-flexy,
+html.vt-on #header.ytd-rich-grid-renderer,
+html.vt-on ytd-feed-filter-chip-bar-renderer,
+html.vt-on #chips-wrapper.ytd-feed-filter-chip-bar-renderer,
+html.vt-on #chips-content.ytd-feed-filter-chip-bar-renderer,
+html.vt-on ytd-tabbed-page-header,
+html.vt-on #page-header-container,
+html.vt-on tp-yt-app-header,
+html.vt-on #tabs-inner-container {
+  background: transparent !important;
+}
+
+html.vt-on #frosted-glass {
+  display: none !important;
+}
+
+/* Setas do carrossel de chips sem o degradê sólido */
+html.vt-on #left-arrow.ytd-feed-filter-chip-bar-renderer::after,
+html.vt-on #right-arrow.ytd-feed-filter-chip-bar-renderer::before,
+html.vt-on #left-arrow.ytd-feed-filter-chip-bar-renderer,
+html.vt-on #right-arrow.ytd-feed-filter-chip-bar-renderer {
+  background: transparent !important;
+}
+html.vt-on #left-arrow-button.ytd-feed-filter-chip-bar-renderer,
+html.vt-on #right-arrow-button.ytd-feed-filter-chip-bar-renderer {
+  background: var(--vt-glass-bg) !important;
+  backdrop-filter: blur(var(--vt-blur));
+  -webkit-backdrop-filter: blur(var(--vt-blur));
+  border-radius: 50%;
+}
+
+/* ---------- Camadas de fundo ---------- */
+
+#vt-wallpaper,
+#vt-light,
+#vt-room,
+#vt-snow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+}
+
+html.vt-on #vt-wallpaper {
+  display: block;
+  z-index: -3;
+  background-color: #0f0f0f;
+  background-size: cover;
+  background-position: center;
+  filter: blur(var(--vt-bg-blur, 0px)) brightness(calc(1 - var(--vt-bg-dim, 0.45)));
+  transform: scale(1.08); /* esconde as bordas do desfoque */
+  transition: opacity 0.6s ease;
+}
+
+html.vt-on.vt-light #vt-light {
+  display: block;
+  z-index: -2;
+  background: radial-gradient(
+    circle 560px at var(--vt-mx, 50%) var(--vt-my, 30%),
+    color-mix(in srgb, var(--vt-light-color, #ffb366) 20%, transparent),
+    rgba(0, 0, 0, var(--vt-light-dark, 0.2)) 100%
+  );
+}
+
+html.vt-on.vt-snow-on #vt-snow {
+  display: block;
+  z-index: -1;
+}
+
+html.vt-on.vt-watch.vt-room #vt-room {
+  display: block;
+  z-index: -2;
+  width: 100vw;
+  height: 100vh;
+  filter: blur(48px) saturate(1.4) brightness(0.5);
+  transform: scale(1.25);
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+html.vt-on.vt-watch.vt-room #vt-room.vt-ready {
+  opacity: 1;
+}
+
+/* ---------- Barra superior flutuante ---------- */
+
+html.vt-on #masthead-container.ytd-app {
+  position: fixed !important;
+  top: 12px !important;
+  left: 24px !important;
+  right: 24px !important;
+  width: auto !important;
+  height: 58px !important;
+  border-radius: 999px;
+  background: var(--vt-glass-bg) !important;
+  backdrop-filter: blur(var(--vt-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--vt-blur)) saturate(1.4);
+  border: 1px solid var(--vt-border);
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  transition: opacity 0.3s ease;
+}
+
+html.vt-on ytd-masthead,
+html.vt-on ytd-masthead #background,
+html.vt-on #masthead-container.ytd-app::after {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+html.vt-on ytd-masthead #container.ytd-masthead {
+  height: 58px !important;
+  padding: 0 12px 0 8px;
+}
+
+html.vt-on #page-manager.ytd-app {
+  margin-top: var(--vt-top) !important;
+}
+
+/* Busca em pílula translúcida */
+html.vt-on ytd-masthead .ytSearchboxComponentInputBox,
+html.vt-on ytd-masthead #search-form #container {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: var(--vt-border) !important;
+}
+html.vt-on ytd-masthead .ytSearchboxComponentSearchButton,
+html.vt-on ytd-masthead #search-icon-legacy {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--vt-border) !important;
+}
+html.vt-on ytd-masthead #voice-search-button button {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Botão do editor (raio) */
+#vt-edit-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 0;
+  margin-right: 8px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: #f1f1f1;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.3s var(--vt-ease);
+}
+#vt-edit-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+#vt-edit-btn:active {
+  transform: scale(0.9);
+}
+html.vt-editing #vt-edit-btn {
+  background: var(--vt-accent);
+  color: #fff;
+}
+
+/* ---------- Menu lateral em painel ---------- */
+
+html.vt-on tp-yt-app-drawer#guide {
+  top: var(--vt-top) !important;
+}
+
+html.vt-on.vt-sidebar-glass tp-yt-app-drawer#guide #contentContainer {
+  left: 16px !important;
+  top: 0 !important;
+  bottom: auto !important;
+  width: 208px !important;
+  height: calc(100vh - var(--vt-top) - 16px) !important;
+  padding: 0 !important;
+  border-radius: 32px;
+  background: var(--vt-glass-bg) !important;
+  backdrop-filter: blur(var(--vt-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--vt-blur)) saturate(1.4);
+  border: 1px solid var(--vt-border);
+  overflow: hidden;
+}
+html.vt-on.vt-sidebar-glass tp-yt-app-drawer#guide #header,
+html.vt-on.vt-sidebar-glass tp-yt-app-drawer#guide #guide-spacer {
+  display: none !important;
+}
+html.vt-on.vt-sidebar-glass #guide-content,
+html.vt-on.vt-sidebar-glass #guide-inner-content {
+  background: transparent !important;
+}
+html.vt-on.vt-sidebar-glass #guide-inner-content {
+  height: 100% !important;
+  padding-top: 8px;
+}
+html.vt-on.vt-sidebar-glass ytd-guide-section-renderer {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html.vt-on.vt-sidebar-glass ytd-guide-entry-renderer tp-yt-paper-item {
+  border-radius: 12px !important;
+  margin: 0 8px;
+  padding: 0 10px !important;
+}
+html.vt-on.vt-sidebar-glass ytd-guide-entry-renderer[active] tp-yt-paper-item {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Mini-guia (menu recolhido) */
+html.vt-on.vt-sidebar-glass ytd-mini-guide-renderer {
+  top: var(--vt-top) !important;
+  left: 12px !important;
+  height: calc(100vh - var(--vt-top) - 16px) !important;
+  border-radius: 32px;
+  background: var(--vt-glass-bg) !important;
+  backdrop-filter: blur(var(--vt-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--vt-blur)) saturate(1.4);
+  border: 1px solid var(--vt-border);
+  padding-top: 6px;
+}
+html.vt-on.vt-sidebar-glass ytd-app[mini-guide-visible] ytd-page-manager {
+  margin-left: 96px !important;
+}
+html.vt-on.vt-sidebar-glass ytd-mini-guide-entry-renderer {
+  border-radius: 16px;
+  margin: 2px 6px;
+  background: transparent !important;
+}
+html.vt-on.vt-sidebar-glass ytd-mini-guide-entry-renderer[aria-selected="true"],
+html.vt-on.vt-sidebar-glass ytd-mini-guide-entry-renderer:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ---------- Chips ---------- */
+
+html.vt-on yt-chip-cloud-chip-renderer .ytChipShapeChip {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #f1f1f1 !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 10px !important;
+  transition: background 0.2s ease, transform 0.25s var(--vt-ease);
+}
+html.vt-on yt-chip-cloud-chip-renderer .ytChipShapeChip:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+html.vt-on yt-chip-cloud-chip-renderer .ytChipShapeActive {
+  background: #f1f1f1 !important;
+  color: #0f0f0f !important;
+}
+
+/* ---------- Cartões de vídeo ---------- */
+
+html.vt-on.vt-cards .ytLockupViewModelHost.ytLockupViewModelVertical {
+  background: var(--vt-card-bg);
+  border-radius: var(--vt-card-radius);
+  overflow: hidden;
+  box-shadow: rgba(0, 0, 0, 0.66) 16px 16px 36px -18px, rgba(0, 0, 0, 0.4) 4px 3px 8px -4px;
+  transition: transform 0.32s var(--vt-ease), box-shadow 0.32s var(--vt-ease), background 0.2s ease;
+  position: relative;
+}
+html.vt-on.vt-cards.vt-card-borders .ytLockupViewModelHost.ytLockupViewModelVertical {
+  outline: 1px solid rgba(255, 255, 255, 0.08);
+  outline-offset: -1px;
+}
+html.vt-on.vt-cards .ytLockupViewModelHost.ytLockupViewModelVertical:hover {
+  transform: translateY(-4px) scale(1.012);
+  background: rgba(241, 241, 241, 0.13);
+  box-shadow: rgba(0, 0, 0, 0.75) 20px 24px 44px -18px, rgba(0, 0, 0, 0.45) 4px 3px 10px -4px;
+}
+html.vt-on.vt-cards .ytLockupViewModelHost .ytLockupViewModelContentImage,
+html.vt-on.vt-cards .ytLockupViewModelHost yt-thumbnail-view-model,
+html.vt-on.vt-cards .ytLockupViewModelHost .ytThumbnailViewModelImage {
+  border-radius: 0 !important;
+}
+html.vt-on.vt-cards .ytLockupViewModelHost .ytLockupViewModelMetadata {
+  padding: 12px 12px 14px !important;
+  zoom: var(--vt-card-text);
+}
+/* esconde o brilho azul de toque do YouTube */
+html.vt-on.vt-cards .ytLockupViewModelHost > yt-touch-feedback-shape {
+  display: none;
+}
+
+/* Título sobre a imagem */
+html.vt-on.vt-cards.vt-card-over .ytLockupViewModelHost .ytLockupViewModelMetadata {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-top: 48px !important;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.88));
+  pointer-events: none;
+}
+html.vt-on.vt-cards.vt-card-over .ytLockupViewModelHost .ytLockupViewModelMetadata * {
+  pointer-events: auto;
+}
+
+/* Disposição */
+html.vt-on.vt-layout-air ytd-rich-grid-renderer {
+  --ytd-rich-grid-items-per-row: 3 !important;
+  --ytd-rich-grid-item-margin: 32px !important;
+}
+html.vt-on.vt-layout-dense ytd-rich-grid-renderer {
+  --ytd-rich-grid-items-per-row: 5 !important;
+  --ytd-rich-grid-item-margin: 12px !important;
+}
+
+/* Largura do feed */
+html.vt-on ytd-browse[page-subtype="home"] ytd-rich-grid-renderer {
+  max-width: calc(var(--vt-feed-w) * 1%);
+  margin-inline: auto;
+}
+
+/* ---------- Destaque / saudação (home) ---------- */
+
+html.vt-on.vt-home.vt-hero ytd-browse[page-subtype="home"] {
+  padding-top: var(--vt-hero-h) !important;
+}
+
+#vt-hero {
+  display: none;
+  position: absolute;
+  top: var(--vt-top, 80px);
+  height: var(--vt-hero-h);
+  box-sizing: border-box;
+  padding: 24px 0 18px;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: #f1f1f1;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  pointer-events: none;
+  z-index: 1;
+}
+html.vt-on.vt-home.vt-hero #vt-hero {
+  display: flex;
+}
+#vt-hero .vt-greet {
+  margin-bottom: auto;
+  padding-top: clamp(24px, 9vh, 90px);
+  animation: vt-rise 0.9s var(--vt-ease) both;
+}
+#vt-hero .vt-date {
+  display: inline-block;
+  padding: 5px 12px;
+  margin: 0 0 14px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  background: var(--vt-glass-bg);
+  backdrop-filter: blur(var(--vt-blur));
+  -webkit-backdrop-filter: blur(var(--vt-blur));
+  border: 1px solid var(--vt-border);
+}
+#vt-hero .vt-title {
+  margin: 0;
+  font-size: clamp(40px, 4.6vw, 64px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-shadow: rgba(0, 0, 0, 0.55) 0 2px 18px;
+}
+#vt-hero .vt-title span {
+  display: block;
+  color: var(--vt-accent);
+}
+#vt-hero .vt-section {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: rgba(0, 0, 0, 0.5) 0 1px 10px;
+}
+html.vt-on:not(.vt-greet) #vt-hero .vt-greet {
+  visibility: hidden;
+}
+
+@keyframes vt-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(6px);
+  }
+}
+
+/* ---------- Página de vídeo ("sala") ---------- */
+
+html.vt-on.vt-watch #vt-wallpaper {
+  opacity: 0.6;
+}
+html.vt-on.vt-watch.vt-room #vt-wallpaper {
+  opacity: 0;
+}
+
+html.vt-on.vt-watch #ytd-player,
+html.vt-on.vt-watch #player-container-outer #ytd-player {
+  border-radius: 18px !important;
+  overflow: hidden;
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.9);
+}
+
+html.vt-on.vt-watch ytd-watch-metadata #description.ytd-watch-metadata,
+html.vt-on.vt-watch ytd-comments#comments,
+html.vt-on.vt-watch #secondary ytd-playlist-panel-renderer #container,
+html.vt-on.vt-watch ytd-engagement-panel-section-list-renderer {
+  background: rgba(12, 12, 12, 0.62) !important;
+  backdrop-filter: blur(var(--vt-blur)) saturate(1.3);
+  -webkit-backdrop-filter: blur(var(--vt-blur)) saturate(1.3);
+  border: 1px solid var(--vt-border);
+  border-radius: 18px !important;
+}
+html.vt-on.vt-watch ytd-comments#comments {
+  padding: 4px 20px 12px;
+  margin-top: 16px;
+}
+html.vt-on.vt-watch ytd-watch-metadata .yt-spec-button-shape-next--tonal {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px);
+}
+html.vt-on.vt-watch .vt-related-card,
+html.vt-on.vt-watch #secondary .ytLockupViewModelHost {
+  border-radius: 14px;
+  transition: background 0.2s ease;
+}
+html.vt-on.vt-watch #secondary .ytLockupViewModelHost:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ---------- Limpeza ---------- */
+
+/* Shorts */
+html.vt-no-shorts ytd-rich-shelf-renderer[is-shorts],
+html.vt-no-shorts ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
+html.vt-no-shorts ytd-rich-section-renderer:has(a[href^="/shorts"]),
+html.vt-no-shorts ytd-reel-shelf-renderer,
+html.vt-no-shorts grid-shelf-view-model:has(a[href^="/shorts"]),
+html.vt-no-shorts ytd-item-section-renderer:has(grid-shelf-view-model a[href^="/shorts"]),
+html.vt-no-shorts ytm-shorts-lockup-view-model,
+html.vt-no-shorts ytm-shorts-lockup-view-model-v2,
+html.vt-no-shorts ytd-rich-item-renderer:has(a[href^="/shorts"]),
+html.vt-no-shorts ytd-video-renderer:has(a[href^="/shorts"]),
+html.vt-no-shorts ytd-grid-video-renderer:has(a[href^="/shorts"]),
+html.vt-no-shorts ytd-compact-video-renderer:has(a[href^="/shorts"]),
+html.vt-no-shorts yt-lockup-view-model:has(a[href^="/shorts"]),
+html.vt-no-shorts ytd-guide-entry-renderer:has(a[title="Shorts"]),
+html.vt-no-shorts ytd-guide-entry-renderer:has(a[href^="/shorts"]),
+html.vt-no-shorts ytd-mini-guide-entry-renderer[aria-label="Shorts"],
+html.vt-no-shorts yt-tab-shape[tab-title="Shorts"],
+html.vt-no-shorts tp-yt-paper-tab:has(> div[title="Shorts"]),
+html.vt-no-shorts yt-chip-cloud-chip-renderer:has([title="Shorts"]) {
+  display: none !important;
+}
+
+/* Anúncios (cosmético; o pulo de anúncio em vídeo fica no content.js) */
+html.vt-no-ads ytd-ad-slot-renderer,
+html.vt-no-ads ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
+html.vt-no-ads ytd-rich-section-renderer:has(ytd-statement-banner-renderer),
+html.vt-no-ads ytd-in-feed-ad-layout-renderer,
+html.vt-no-ads ytd-banner-promo-renderer,
+html.vt-no-ads ytd-statement-banner-renderer,
+html.vt-no-ads ytd-promoted-sparkles-web-renderer,
+html.vt-no-ads ytd-promoted-video-renderer,
+html.vt-no-ads ytd-display-ad-renderer,
+html.vt-no-ads ytd-companion-slot-renderer,
+html.vt-no-ads ytd-action-companion-ad-renderer,
+html.vt-no-ads ytd-player-legacy-desktop-watch-ads-renderer,
+html.vt-no-ads ytd-search-pyv-renderer,
+html.vt-no-ads ytd-primetime-promo-renderer,
+html.vt-no-ads ytd-brand-video-singleton-renderer,
+html.vt-no-ads #masthead-ad,
+html.vt-no-ads #player-ads,
+html.vt-no-ads .ytp-ad-overlay-container,
+html.vt-no-ads .ytp-ad-image-overlay,
+html.vt-no-ads ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"],
+html.vt-no-ads ytd-mealbar-promo-renderer,
+html.vt-no-ads tp-yt-paper-dialog:has(ytd-mealbar-promo-renderer) {
+  display: none !important;
+}
+
+/* Recomendados na página de vídeo */
+html.vt-no-related.vt-watch #secondary #related,
+html.vt-no-related.vt-watch #secondary ytd-watch-next-secondary-results-renderer {
+  display: none !important;
+}
+html.vt-no-related.vt-watch ytd-watch-flexy:not([theater]) #columns {
+  max-width: 1280px;
+  margin-inline: auto;
+}
+
+/* Telas finais */
+html.vt-no-endscreens .ytp-ce-element,
+html.vt-no-endscreens .ytp-endscreen-content,
+html.vt-no-endscreens .ytp-fullscreen-grid,
+html.vt-no-endscreens .ytp-videowall-still {
+  display: none !important;
+}
+
+/* Merch / ingressos / produtos */
+html.vt-no-merch ytd-merch-shelf-renderer,
+html.vt-no-merch ytd-ticket-shelf-renderer,
+html.vt-no-merch ytd-product-list-renderer,
+html.vt-no-merch #ticket-shelf {
+  display: none !important;
+}
+
+/* =========================================================================
+   Editor visual
+   ========================================================================= */
+
+#vt-editor {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translate(-50%, 140%);
+  z-index: 2147483000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 7px 7px 16px;
+  border-radius: 999px;
+  background: rgba(20, 20, 22, 0.78);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.75);
+  font: 500 12px/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #f1f1f1;
+  opacity: 0;
+  transition: transform 0.45s var(--vt-ease, ease), opacity 0.3s ease;
+  max-width: calc(100vw - 32px);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+html.vt-editing #vt-editor {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+#vt-editor .vt-ed-label {
+  font-weight: 700;
+  margin-right: 6px;
+  white-space: nowrap;
+}
+#vt-editor button,
+#vt-panel button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+#vt-editor .vt-tab {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+  padding: 8px 12px;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+#vt-editor .vt-tab:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+#vt-editor .vt-tab[aria-pressed="true"] {
+  background: #f1f1f1;
+  color: #0f0f0f;
+}
+#vt-editor .vt-done {
+  border: 0;
+  background: var(--vt-accent, #ff4d4d);
+  color: #fff !important;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 9px 16px;
+  margin-left: 6px;
+}
+
+#vt-panel {
+  position: fixed;
+  z-index: 2147483001;
+  bottom: 74px;
+  width: 300px;
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  padding: 14px;
+  border-radius: 20px;
+  background: rgba(20, 20, 22, 0.86);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 24px 60px -14px rgba(0, 0, 0, 0.8);
+  color: #f1f1f1;
+  font: 400 12.5px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif;
+  display: none;
+  animation: vt-pop 0.35s var(--vt-ease, ease);
+  scrollbar-width: thin;
+}
+#vt-panel.vt-open {
+  display: block;
+}
+@keyframes vt-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+}
+#vt-panel .vt-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+#vt-panel .vt-head h3 {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  flex: 1;
+}
+#vt-panel .vt-x {
+  border: 0;
+  background: none;
+  font-size: 16px;
+  opacity: 0.7;
+  padding: 2px 4px;
+}
+#vt-panel .vt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 10px 0;
+}
+#vt-panel .vt-col {
+  margin: 12px 0;
+}
+#vt-panel .vt-col > .vt-lbl {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 7px;
+  opacity: 0.9;
+}
+#vt-panel .vt-lbl small {
+  opacity: 0.6;
+}
+
+/* toggle */
+#vt-panel .vt-switch {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  flex: none;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.25s ease;
+}
+#vt-panel .vt-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.3s var(--vt-ease, ease);
+}
+#vt-panel .vt-switch[aria-checked="true"] {
+  background: var(--vt-accent, #ff4d4d);
+}
+#vt-panel .vt-switch[aria-checked="true"]::after {
+  transform: translateX(14px);
+}
+
+/* slider */
+#vt-panel input[type="range"] {
+  width: 100%;
+  accent-color: var(--vt-accent, #ff4d4d);
+  margin: 0;
+}
+
+/* segmented */
+#vt-panel .vt-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#vt-panel .vt-seg button {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+  padding: 6px 11px;
+}
+#vt-panel .vt-seg button[aria-pressed="true"] {
+  background: #f1f1f1;
+  color: #0f0f0f;
+  border-color: #f1f1f1;
+}
+
+/* wallpapers */
+#vt-panel .vt-walls {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+#vt-panel .vt-wall {
+  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 3px 3px 5px;
+  font-size: 10.5px;
+  opacity: 0.9;
+}
+#vt-panel .vt-wall i {
+  display: block;
+  height: 44px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  background-size: cover;
+  background-position: center;
+}
+#vt-panel .vt-wall[aria-pressed="true"] {
+  border-color: var(--vt-accent, #ff4d4d);
+  opacity: 1;
+}
+
+#vt-panel .vt-btn {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 7px 11px;
+}
+#vt-panel input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f1f1f1;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font: inherit;
+  outline: none;
+}
+#vt-panel input[type="text"]:focus {
+  border-color: var(--vt-accent, #ff4d4d);
+}
+#vt-panel input[type="color"] {
+  width: 38px;
+  height: 22px;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+#vt-panel .vt-hint {
+  opacity: 0.55;
+  font-size: 11px;
+  margin: 4px 0 0;
+}
+
+/* Realce do que está sendo editado */
+html.vt-editing.vt-flash-masthead #masthead-container.ytd-app,
+html.vt-editing.vt-flash-guide tp-yt-app-drawer#guide #contentContainer,
+html.vt-editing.vt-flash-guide ytd-mini-guide-renderer,
+html.vt-editing.vt-flash-hero #vt-hero .vt-greet {
+  outline: 2px solid var(--vt-accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.vt-on *,
+  #vt-editor,
+  #vt-panel {
+    transition: none !important;
+    animation: none !important;
+  }
+}
