@@ -47,6 +47,19 @@ Depois de editar o código, clique em ↻ no card da extensão e recarregue a ab
 - **Automático** usa `pt` quando o navegador está em qualquer variante de português, e `en` nos outros casos.
 - Para adicionar um idioma: crie um objeto novo em `src/i18n.js`, ajuste `vitroLang`/`vitroLocale`, adicione a opção no `<select>` do `popup/popup.html` e uma pasta em `_locales/`.
 
+## Testes
+
+```sh
+npm install        # só o @playwright/test; não baixa navegador
+npm test           # unitários (node:test, sem navegador)
+npm run test:e2e   # ponta a ponta: carrega a extensão no Chromium
+npm run test:all   # os dois
+```
+
+- **Unitários** (`tests/unit/`): lógica pura do `src/core.js` (classes, variáveis CSS, saudação, rotas, redirecionamento de Shorts, escolha do wallpaper), limpeza das configurações salvas, paridade e cobertura do dicionário EN/PT e integridade do pacote (arquivos do manifest, locales, wallpapers, CSS, changelog). Inclui teste de regressão do bug da saudação da v1.1.0.
+- **E2E** (`tests/e2e/`): abre o Chromium do sistema (`CHROMIUM_PATH`, padrão `/usr/bin/chromium`) com o Vitro carregado e serve uma página falsa do YouTube no lugar de `https://www.youtube.com/` por interceptação de rede, sem tocar no site real. Cobre tema, vidro, Shorts/anúncios escondidos, posição da saudação, editor, persistência, popup, troca de idioma, redirecionamento de Shorts, página de vídeo e pulo de anúncio.
+- `HEADED=1 npm run test:e2e` mostra o navegador.
+
 ## Versões
 
 A versão atual fica no `manifest.json` (aparece no popup e em `brave://extensions`) e o histórico no [CHANGELOG.md](CHANGELOG.md). Cada versão lançada tem uma tag git `vX.Y.Z` assinada com GPG.
@@ -70,7 +83,8 @@ O script sobe a versão no manifest, fecha a seção do changelog com a data, cr
 ```
 manifest.json        MV3
 _locales/            nome e descrição da extensão (en, pt_BR)
-src/settings.js      padrões + load/save
+src/settings.js      padrões + load/save/limpeza
+src/core.js          lógica pura (testada)
 src/i18n.js          dicionário EN/PT e escolha de idioma
 src/wallpapers.js    lista de papéis de parede (imagens + SVG gerado)
 src/content.js       classes no <html>, camadas de fundo, saudação, sala, editor, pulo de anúncio
@@ -80,6 +94,8 @@ wallpapers/          imagens originais (fonte)
 assets/wallpapers/   imagens otimizadas usadas pela extensão (2560px, JPEG)
 assets/thumbs/       miniaturas do editor
 docs/                imagens do README
+tests/unit/          node:test
+tests/e2e/           Playwright + YouTube falso
 scripts/release.sh   versionamento (bump + tag + zip)
 CHANGELOG.md         histórico de versões
 icons/               ícone (SVG → PNG via rsvg-convert)

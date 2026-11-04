@@ -1,0 +1,95 @@
+// Páginas que imitam o DOM do YouTube (só a estrutura que o Vitro usa).
+// São servidas no lugar de https://www.youtube.com/ por interceptação de rede,
+// então o content script injeta como no site real, sem depender da rede.
+
+const lockup = (title, href = "/watch?v=abc123def45") => `
+  <ytd-rich-item-renderer class="vt-test-video">
+    <yt-lockup-view-model>
+      <div class="ytLockupViewModelHost ytLockupViewModelVertical">
+        <a class="ytLockupViewModelContentImage" href="${href}">
+          <yt-thumbnail-view-model class="ytThumbnailViewModelHost">
+            <div class="ytThumbnailViewModelImage" style="aspect-ratio:16/9;background:#345"></div>
+          </yt-thumbnail-view-model>
+        </a>
+        <div class="ytLockupViewModelMetadata"><h3>${title}</h3></div>
+      </div>
+    </yt-lockup-view-model>
+  </ytd-rich-item-renderer>`;
+
+const shell = (page) => `<!doctype html>
+<html dark lang="en">
+<head><meta charset="utf-8"><title>YouTube</title>
+<style>
+  body { margin: 0; font-family: sans-serif; color: #f1f1f1; }
+  ytd-app, ytd-page-manager, ytd-browse, ytd-rich-grid-renderer, ytd-masthead,
+  ytd-rich-item-renderer, ytd-rich-section-renderer, ytd-watch-flexy { display: block; }
+  #masthead-container { position: fixed; top: 0; left: 0; right: 0; height: 56px; z-index: 2020; }
+  #container.ytd-masthead { display: flex; justify-content: space-between; align-items: center; height: 56px; }
+  #page-manager { display: block; margin-left: 240px; }
+  #contents.ytd-rich-grid-renderer { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+</style></head>
+<body>
+<ytd-app>
+  <div id="masthead-container" class="ytd-app">
+    <ytd-masthead>
+      <div id="container" class="ytd-masthead">
+        <div id="start">YouTube</div>
+        <div id="center">search</div>
+        <div id="end"><div id="buttons">buttons</div></div>
+      </div>
+    </ytd-masthead>
+  </div>
+  <tp-yt-app-drawer id="guide" style="position:fixed;top:56px;left:0;bottom:0;width:240px">
+    <div id="contentContainer" style="position:absolute;top:0;bottom:0;left:0;width:240px">
+      <div id="guide-content"><div id="guide-inner-content">
+        <ytd-guide-entry-renderer class="vt-test-guide-home" active><a title="Home" href="/">Home</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer class="vt-test-guide-shorts"><a title="Shorts" href="/shorts/">Shorts</a></ytd-guide-entry-renderer>
+      </div></div>
+    </div>
+  </tp-yt-app-drawer>
+  <ytd-page-manager id="page-manager" class="ytd-app">${page}</ytd-page-manager>
+</ytd-app>
+</body></html>`;
+
+export const homePage = () =>
+  shell(`
+  <ytd-browse page-subtype="home">
+    <ytd-rich-grid-renderer>
+      <div id="header" class="ytd-rich-grid-renderer">
+        <ytd-feed-filter-chip-bar-renderer><div id="chips-wrapper" class="ytd-feed-filter-chip-bar-renderer">
+          <yt-chip-cloud-chip-renderer><div class="ytChipShapeChip ytChipShapeActive">All</div></yt-chip-cloud-chip-renderer>
+          <yt-chip-cloud-chip-renderer><div class="ytChipShapeChip">Music</div></yt-chip-cloud-chip-renderer>
+        </div></ytd-feed-filter-chip-bar-renderer>
+      </div>
+      <div id="contents" class="ytd-rich-grid-renderer">
+        ${lockup("Normal video 1")}
+        ${lockup("Normal video 2")}
+        <ytd-rich-item-renderer class="vt-test-ad"><ytd-ad-slot-renderer>Ad</ytd-ad-slot-renderer></ytd-rich-item-renderer>
+        <ytd-rich-section-renderer class="vt-test-shorts-shelf">
+          <ytd-rich-shelf-renderer is-shorts>Shorts shelf</ytd-rich-shelf-renderer>
+        </ytd-rich-section-renderer>
+        <ytd-rich-item-renderer class="vt-test-short-item"><a href="/shorts/xyz987654">A short</a></ytd-rich-item-renderer>
+        ${lockup("Normal video 3")}
+      </div>
+    </ytd-rich-grid-renderer>
+  </ytd-browse>`);
+
+export const watchPage = ({ ad = false } = {}) =>
+  shell(`
+  <ytd-watch-flexy>
+    <div id="columns">
+      <div id="primary">
+        <div id="movie_player" class="html5-video-player${ad ? " ad-showing" : ""}">
+          <video width="640" height="360"></video>
+          ${ad ? `<button class="ytp-skip-ad-button" onclick="window.__skipped = (window.__skipped||0)+1">Skip</button>` : ""}
+        </div>
+        <ytd-watch-metadata><div id="description" class="ytd-watch-metadata">Description</div></ytd-watch-metadata>
+        <ytd-comments id="comments">Comments</ytd-comments>
+      </div>
+      <div id="secondary">
+        <div id="related">${lockup("Related video")}</div>
+      </div>
+    </div>
+    <div class="ytp-ce-element vt-test-endscreen">End screen</div>
+    <ytd-merch-shelf-renderer class="vt-test-merch">Merch</ytd-merch-shelf-renderer>
+  </ytd-watch-flexy>`);

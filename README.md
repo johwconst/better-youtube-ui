@@ -47,6 +47,19 @@ After editing the code, click ↻ on the extension card and reload the YouTube t
 - **Automatic** uses `pt` when the browser is set to any Portuguese variant and `en` otherwise.
 - To add a language: add a new object in `src/i18n.js`, update `vitroLang`/`vitroLocale`, add the option to the `<select>` in `popup/popup.html`, and add a folder under `_locales/`.
 
+## Tests
+
+```sh
+npm install        # only @playwright/test; no browser download
+npm test           # unit tests (node:test, no browser)
+npm run test:e2e   # end-to-end: loads the extension in Chromium
+npm run test:all   # both
+```
+
+- **Unit** (`tests/unit/`): pure logic in `src/core.js` (classes, CSS variables, greeting, routes, Shorts redirect, wallpaper choice), settings sanitizing, EN/PT dictionary parity and coverage, and package integrity (manifest files, locales, wallpapers, CSS, changelog). Includes a regression test for the v1.1.0 hero bug.
+- **E2E** (`tests/e2e/`): launches the system Chromium (`CHROMIUM_PATH`, default `/usr/bin/chromium`) with Vitro loaded and serves a fake YouTube page in place of `https://www.youtube.com/` via request interception, so it never touches the real site. Covers theme, glass, Shorts/ads hiding, greeting layout, editor, persistence, popup, language switching, Shorts redirect, video page and ad skipping.
+- `HEADED=1 npm run test:e2e` shows the browser.
+
 ## Versions
 
 The current version lives in `manifest.json` (shown in the popup and in `brave://extensions`), and the history in [CHANGELOG.md](CHANGELOG.md) (in Portuguese). Every release has a GPG-signed git tag `vX.Y.Z`.
@@ -70,7 +83,8 @@ The script bumps the manifest version, closes the changelog section with the dat
 ```
 manifest.json        MV3
 _locales/            extension name and description (en, pt_BR)
-src/settings.js      defaults + load/save
+src/settings.js      defaults + load/save/sanitize
+src/core.js          pure logic (tested)
 src/i18n.js          EN/PT dictionary and language selection
 src/wallpapers.js    wallpaper list (images + generated SVG)
 src/content.js       <html> classes, background layers, greeting, theater, editor, ad skipping
@@ -80,6 +94,8 @@ wallpapers/          original images (source)
 assets/wallpapers/   optimized images used by the extension (2560px, JPEG)
 assets/thumbs/       editor thumbnails
 docs/                README images
+tests/unit/          node:test
+tests/e2e/           Playwright + fake YouTube
 scripts/release.sh   versioning (bump + tag + zip)
 CHANGELOG.md         version history
 icons/               icon (SVG → PNG via rsvg-convert)

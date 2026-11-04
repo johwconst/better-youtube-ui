@@ -49,9 +49,23 @@ globalThis.VITRO_DEFAULTS = {
   room: true,
 };
 
+// Junta o que está salvo com os padrões, descartando chaves desconhecidas
+// (de versões antigas) e valores com tipo errado (storage corrompido).
+globalThis.vitroMerge = function (saved) {
+  const D = globalThis.VITRO_DEFAULTS;
+  const out = { ...D };
+  if (saved && typeof saved === "object") {
+    for (const k of Object.keys(D)) {
+      const v = saved[k];
+      if (typeof v === typeof D[k] && (typeof v !== "number" || Number.isFinite(v))) out[k] = v;
+    }
+  }
+  return out;
+};
+
 globalThis.vitroLoad = async function () {
   const sync = await chrome.storage.sync.get("settings");
-  return { ...globalThis.VITRO_DEFAULTS, ...(sync.settings || {}) };
+  return globalThis.vitroMerge(sync.settings);
 };
 
 globalThis.vitroSave = function (settings) {

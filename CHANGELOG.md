@@ -14,8 +14,15 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - Seletor de idioma no popup (Automático / English / Português); o editor e a saudação trocam na hora.
 - README em inglês (`README.md`) e em português (`README.pt-BR.md`), com links de troca.
 
+- Testes: 35 unitários (`node:test`) e 15 E2E (Playwright no Chromium do sistema com YouTube falso). `npm test`, `npm run test:e2e`.
+
 ### Alterado
 - `scripts/release.sh` inclui `_locales/` no zip.
+- Lógica pura extraída para `src/core.js`.
+- Configurações salvas são saneadas (`vitroMerge`): chaves antigas e valores com tipo errado são descartados.
+
+### Corrigido
+- Botão ⚡ do editor podia levar até 3s para aparecer quando a página já chegava pronta (achado pelos testes E2E).
 
 ## [1.1.0] - 2026-11-04
 

@@ -5,6 +5,7 @@
   let S = { ...globalThis.VITRO_DEFAULTS };
   let customImage = null;
   const t = (k) => globalThis.vitroT(k);
+  const C = globalThis.VitroCore;
   let currentLang = null;
 
   // ---------------------------------------------------------------------
@@ -12,8 +13,8 @@
   // ---------------------------------------------------------------------
   function redirectShorts() {
     if (!S.enabled || !S.hideShorts) return;
-    const m = location.pathname.match(/^\/shorts\/([\w-]{6,})/);
-    if (m) location.replace(`/watch?v=${m[1]}`);
+    const target = C.shortsTarget(location.pathname);
+    if (target) location.replace(target);
   }
 
   // ---------------------------------------------------------------------
@@ -28,39 +29,8 @@
     const lang = globalThis.vitroSetLang(S.language);
     if (currentLang && lang !== currentLang) onLanguageChange();
     currentLang = lang;
-    setClass("vt-on", on);
-    setClass("vt-no-shorts", on && S.hideShorts);
-    setClass("vt-no-ads", on && S.blockAds);
-    setClass("vt-no-related", on && S.hideRelated);
-    setClass("vt-no-endscreens", on && S.hideEndscreens);
-    setClass("vt-no-merch", on && S.hideMerch);
-    setClass("vt-sidebar-glass", on && S.sidebarGlass);
-    setClass("vt-cards", on && S.cards);
-    setClass("vt-card-over", S.cardTitle === "over");
-    setClass("vt-card-borders", S.cardBorders);
-    setClass("vt-layout-air", S.cardLayout === "air");
-    setClass("vt-layout-dense", S.cardLayout === "dense");
-    setClass("vt-hero", on && S.hero);
-    setClass("vt-greet", S.greet);
-    setClass("vt-light", on && S.light);
-    setClass("vt-snow-on", on && S.hero && S.snow);
-    setClass("vt-room", on && S.room);
-
-    const st = html.style;
-    const glass = {
-      glass: { alpha: S.glassAlpha / 100, blur: S.glassBlur },
-      frost: { alpha: Math.min(0.85, S.glassAlpha / 100 + 0.25), blur: Math.round(S.glassBlur * 1.8) },
-      solid: { alpha: 0.96, blur: 0 },
-    }[S.glassStyle] || { alpha: 0.48, blur: 14 };
-    st.setProperty("--vt-glass-alpha", glass.alpha);
-    st.setProperty("--vt-blur", glass.blur + "px");
-    st.setProperty("--vt-accent", S.accent);
-    st.setProperty("--vt-card-text", S.cardText / 100);
-    st.setProperty("--vt-feed-w", S.feedWidth);
-    st.setProperty("--vt-bg-dim", S.bgDim / 100);
-    st.setProperty("--vt-bg-blur", S.bgBlur + "px");
-    st.setProperty("--vt-light-color", S.lightColor);
-    st.setProperty("--vt-light-dark", S.lightDark / 100);
+    for (const [name, value] of Object.entries(C.htmlClasses(S))) setClass(name, value);
+    for (const [name, value] of Object.entries(C.cssVars(S))) html.style.setProperty(name, value);
 
     updateWallpaper();
     updateHero();
@@ -93,9 +63,7 @@
 
   function updateWallpaper() {
     if (!layers.wall) return;
-    let css;
-    if (S.wallpaper === "custom" && customImage) css = `url("${customImage}")`;
-    else css = (WALLS.find((w) => w.id === S.wallpaper) || WALLS.find((w) => w.id === globalThis.VITRO_DEFAULTS.wallpaper)).css;
+    const css = C.wallpaperCss(WALLS, S.wallpaper, customImage, globalThis.VITRO_DEFAULTS.wallpaper);
     if (layers.wall.dataset.bg !== css) {
       layers.wall.style.backgroundImage = css;
       layers.wall.dataset.bg = css;
@@ -204,15 +172,11 @@
   // ---------------------------------------------------------------------
   let hero;
   function greeting() {
-    const h = new Date().getHours();
-    if (h < 5) return t("greet.night");
-    if (h < 12) return t("greet.morning");
-    if (h < 18) return t("greet.afternoon");
-    return t("greet.evening");
+    return t(C.greetingKey(new Date().getHours()));
   }
 
   function heroHeight() {
-    return Math.round(Math.min(Math.max(innerHeight * 0.44, 300), 460));
+    return C.heroHeight(innerHeight);
   }
 
   function updateHero() {
@@ -262,9 +226,9 @@
   // ---------------------------------------------------------------------
   function route() {
     redirectShorts();
-    const p = location.pathname;
-    const isHome = p === "/" || p === "/feed/home" || p === "";
-    const isWatch = p === "/watch";
+    const page = C.pageOf(location.pathname);
+    const isHome = page === "home";
+    const isWatch = page === "watch";
     setClass("vt-home", isHome);
     setClass("vt-watch", isWatch);
     if (isWatch && S.enabled && S.room) room.start();
@@ -561,6 +525,7 @@
       ensureLayers();
       applySettings();
       route();
+      ensureEditButton(); // não esperar mutação/intervalo se a masthead já existe
     };
     if (document.body) onBody();
     else document.addEventListener("DOMContentLoaded", onBody, { once: true });
@@ -583,7 +548,7 @@
 
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area === "sync" && changes.settings) {
-      S = { ...globalThis.VITRO_DEFAULTS, ...changes.settings.newValue };
+      S = globalThis.vitroMerge(changes.settings.newValue);
       applySettings();
       route();
     }
