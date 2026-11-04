@@ -30,6 +30,7 @@ Depois de editar o código, clique em ↻ no card da extensão e recarregue a ab
 | **Luz** | Halo que segue o cursor sobre o papel de parede, com escuridão ao redor. |
 | **Página de vídeo** | "Sala de cinema": o fundo vira o próprio vídeo desfocado; descrição e comentários em painéis de vidro. |
 | **Limpeza** | Sem Shorts (inclusive redireciona `/shorts/ID` para `/watch?v=ID`), anúncios escondidos e pulados, recomendados opcionais, sem telas finais, sem merch. |
+| **Tema escuro** | Força a paleta escura do YouTube mesmo com a conta no tema claro (ligado por padrão; desligar devolve o original). |
 | **Idioma** | Inglês e português. Segue o idioma do navegador ou pode ser escolhido no popup. |
 
 ## Como usar
@@ -57,7 +58,7 @@ npm run test:all   # os dois
 ```
 
 - **Unitários** (`tests/unit/`): lógica pura do `src/core.js` (classes, variáveis CSS, saudação, rotas, redirecionamento de Shorts, escolha do wallpaper), limpeza das configurações salvas, paridade e cobertura do dicionário EN/PT e integridade do pacote (arquivos do manifest, locales, wallpapers, CSS, changelog). Inclui teste de regressão do bug da saudação da v1.1.0.
-- **E2E** (`tests/e2e/`): abre o Chromium do sistema (`CHROMIUM_PATH`, padrão `/usr/bin/chromium`) com o Vitro carregado e serve uma página falsa do YouTube no lugar de `https://www.youtube.com/` por interceptação de rede, sem tocar no site real. Cobre tema, vidro, Shorts/anúncios escondidos, posição da saudação, editor, persistência, popup, troca de idioma, redirecionamento de Shorts, página de vídeo e pulo de anúncio.
+- **E2E** (`tests/e2e/`): abre o Chromium do sistema (`CHROMIUM_PATH`, padrão `/usr/bin/chromium`) com o Vitro carregado e serve uma página falsa do YouTube no lugar de `https://www.youtube.com/` por interceptação de rede, sem tocar no site real. Cobre tema, vidro, Shorts/anúncios escondidos, posição e alinhamento da saudação, tema escuro forçado, editor, persistência, popup, troca de idioma, redirecionamento de Shorts, página de vídeo e pulo de anúncio.
 - `HEADED=1 npm run test:e2e` mostra o navegador.
 
 ## Versões

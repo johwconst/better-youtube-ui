@@ -30,6 +30,7 @@ After editing the code, click ↻ on the extension card and reload the YouTube t
 | **Light** | A glow that follows the cursor over the wallpaper, with darkness around it. |
 | **Video page** | "Movie theater": the background becomes the video itself, blurred; description and comments sit in glass panels. |
 | **Cleanup** | No Shorts (also redirects `/shorts/ID` to `/watch?v=ID`), hidden and skipped ads, optional recommendations, no end screens, no merch. |
+| **Dark theme** | Forces YouTube's dark palette even if your account uses the light theme (on by default; turning it off restores the original). |
 | **Language** | English and Portuguese. Follows the browser language or can be picked in the popup. |
 
 ## Usage
@@ -57,7 +58,7 @@ npm run test:all   # both
 ```
 
 - **Unit** (`tests/unit/`): pure logic in `src/core.js` (classes, CSS variables, greeting, routes, Shorts redirect, wallpaper choice), settings sanitizing, EN/PT dictionary parity and coverage, and package integrity (manifest files, locales, wallpapers, CSS, changelog). Includes a regression test for the v1.1.0 hero bug.
-- **E2E** (`tests/e2e/`): launches the system Chromium (`CHROMIUM_PATH`, default `/usr/bin/chromium`) with Vitro loaded and serves a fake YouTube page in place of `https://www.youtube.com/` via request interception, so it never touches the real site. Covers theme, glass, Shorts/ads hiding, greeting layout, editor, persistence, popup, language switching, Shorts redirect, video page and ad skipping.
+- **E2E** (`tests/e2e/`): launches the system Chromium (`CHROMIUM_PATH`, default `/usr/bin/chromium`) with Vitro loaded and serves a fake YouTube page in place of `https://www.youtube.com/` via request interception, so it never touches the real site. Covers theme, glass, Shorts/ads hiding, greeting layout and alignment, forced dark theme, editor, persistence, popup, language switching, Shorts redirect, video page and ad skipping.
 - `HEADED=1 npm run test:e2e` shows the browser.
 
 ## Versions

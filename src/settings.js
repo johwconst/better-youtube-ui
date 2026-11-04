@@ -2,6 +2,7 @@
 globalThis.VITRO_DEFAULTS = {
   enabled: true,
   language: "auto", // auto | en | pt
+  forceDark: true, // tema escuro do YouTube mesmo se a conta estiver no claro
 
   // Limpeza
   hideShorts: true,

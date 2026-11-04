@@ -29,12 +29,32 @@
     const lang = globalThis.vitroSetLang(S.language);
     if (currentLang && lang !== currentLang) onLanguageChange();
     currentLang = lang;
+    applyDark();
     for (const [name, value] of Object.entries(C.htmlClasses(S))) setClass(name, value);
     for (const [name, value] of Object.entries(C.cssVars(S))) html.style.setProperty(name, value);
 
     updateWallpaper();
     updateHero();
     snow.toggle(on && S.hero && S.snow);
+  }
+
+  // ---------------------------------------------------------------------
+  // Tema escuro forçado
+  // O texto do YouTube usa a paleta de html[dark]; no tema claro ele fica
+  // escuro sobre o papel de parede. Mantemos o atributo enquanto for preciso
+  // e, ao desligar, devolvemos o estado original da página.
+  // ---------------------------------------------------------------------
+  const originalDark = html.hasAttribute("dark"); // document_start: vem do HTML do servidor
+  const darkGuard = new MutationObserver(() => {
+    if (C.wantsDark(S, originalDark) && !html.hasAttribute("dark")) html.setAttribute("dark", "");
+  });
+
+  function applyDark() {
+    const want = C.wantsDark(S, originalDark);
+    if (want && !html.hasAttribute("dark")) html.setAttribute("dark", "");
+    if (!want && html.hasAttribute("dark")) html.removeAttribute("dark");
+    if (S.enabled && S.forceDark) darkGuard.observe(html, { attributes: true, attributeFilter: ["dark"] });
+    else darkGuard.disconnect();
   }
 
   // ---------------------------------------------------------------------
@@ -195,7 +215,7 @@
         el("h2", "vt-section")
       );
     }
-    if (!hero.isConnected) document.body.appendChild(hero);
+    placeHero();
     hero.querySelector(".vt-date").textContent = new Date().toLocaleDateString(globalThis.vitroLocale(), {
       weekday: "long",
       day: "numeric",
@@ -205,21 +225,60 @@
     hero.querySelector(".vt-title span").textContent = S.name.trim() || t("hero.fallbackName");
     hero.querySelector(".vt-section").textContent = t("hero.section");
     html.style.setProperty("--vt-hero-h", heroHeight() + "px");
-    positionHero();
   }
 
-  function positionHero() {
-    if (!hero || !html.classList.contains("vt-home")) return;
-    const grid = document.querySelector('ytd-browse[page-subtype="home"] ytd-rich-grid-renderer #contents');
-    const ref = grid?.getBoundingClientRect();
-    const left = ref && ref.width ? ref.left + 8 : 260;
-    hero.style.left = left + scrollX + "px";
-    hero.style.width = (ref && ref.width ? ref.width - 16 : innerWidth - left - 40) + "px";
+  // A saudação entra no fluxo da página, dentro da grade da home e antes
+  // dos chips. Assim ela empurra o feed naturalmente e acompanha a largura
+  // da grade, sem posicionamento absoluto nem temporizadores.
+  const HOME_GRID = 'ytd-browse[page-subtype="home"] ytd-rich-grid-renderer';
+  let gridWait = null;
+
+  function placeHero() {
+    if (!hero) return;
+    const grid = document.querySelector(HOME_GRID);
+    if (!grid) {
+      // grade ainda não montada: espera ela aparecer (uma vez, com limite)
+      if (!gridWait && html.classList.contains("vt-home")) {
+        gridWait = new MutationObserver(() => document.querySelector(HOME_GRID) && stopGridWait() && placeHero());
+        gridWait.observe(document.documentElement, { childList: true, subtree: true });
+        setTimeout(stopGridWait, 15000);
+      }
+      return;
+    }
+    if (hero.parentElement !== grid) {
+      const header = grid.querySelector(":scope > #header");
+      grid.insertBefore(hero, header || grid.firstChild);
+      heroAlign.disconnect();
+      const contents = grid.querySelector(":scope > #contents");
+      heroAlign.observe(grid);
+      if (contents) heroAlign.observe(contents);
+    }
+    alignHero();
   }
-  addEventListener("resize", () => {
-    html.style.setProperty("--vt-hero-h", heroHeight() + "px");
-    positionHero();
-  });
+
+  function stopGridWait() {
+    gridWait?.disconnect();
+    gridWait = null;
+    return true;
+  }
+
+  // Alinha a saudação com a borda dos cartões (o YouTube centraliza #contents
+  // e dá margem aos itens; isso muda com a largura da janela e o menu lateral).
+  function alignHero() {
+    const grid = hero?.parentElement;
+    const contents = grid?.querySelector(":scope > #contents");
+    if (!contents) return;
+    const g = grid.getBoundingClientRect();
+    const c = contents.getBoundingClientRect();
+    if (!c.width) return;
+    const item = contents.querySelector("ytd-rich-item-renderer");
+    const m = item ? parseFloat(getComputedStyle(item).marginLeft) || 0 : 8;
+    hero.style.marginLeft = Math.max(0, c.left - g.left + m) + "px";
+    hero.style.marginRight = Math.max(0, g.right - c.right + m) + "px";
+  }
+  const heroAlign = new ResizeObserver(() => alignHero());
+
+  addEventListener("resize", () => html.style.setProperty("--vt-hero-h", heroHeight() + "px"));
 
   // ---------------------------------------------------------------------
   // Rotas do SPA do YouTube
@@ -233,20 +292,12 @@
     setClass("vt-watch", isWatch);
     if (isWatch && S.enabled && S.room) room.start();
     else room.stop();
-    if (isHome) {
-      updateHero();
-      // a grade pode demorar a montar
-      setTimeout(positionHero, 300);
-      setTimeout(positionHero, 1200);
-    }
+    if (isHome) updateHero();
   }
 
   document.addEventListener("yt-navigate-start", redirectShorts);
   document.addEventListener("yt-navigate-finish", route);
   document.addEventListener("yt-page-data-updated", route);
-
-  // Abrir/fechar o menu lateral muda a largura da grade
-  const ro = new ResizeObserver(() => positionHero());
 
   // ---------------------------------------------------------------------
   // Anúncios em vídeo: pula / acelera
@@ -420,6 +471,8 @@
           seg(t("opt.glassStyle"), "glassStyle", [["glass", t("opt.glassStyle.glass")], ["frost", t("opt.glassStyle.frost")], ["solid", t("opt.glassStyle.solid")]]),
           slider(t("opt.blur"), "glassBlur", 0, 40, "px"),
           slider(t("opt.transparency"), "glassAlpha", 10, 90, "%"),
+          toggle(t("opt.forceDark"), "forceDark"),
+          h("p", { class: "vt-hint" }, t("hint.forceDark")),
         ],
       },
       video: { master: "room", body: () => [h("p", { class: "vt-hint" }, t("hint.room")), toggle(t("opt.hideRelated"), "hideRelated")] },
@@ -535,11 +588,6 @@
       if (!document.body) return;
       if (!layers.wall?.isConnected) ensureLayers() && applySettings();
       ensureEditButton();
-      const pm = document.querySelector("ytd-page-manager");
-      if (pm && !pm.dataset.vtObserved) {
-        pm.dataset.vtObserved = "1";
-        ro.observe(pm);
-      }
     });
     mo.observe(html, { childList: true, subtree: true });
     setTimeout(() => mo.disconnect(), 20000); // depois disso, só as rotas

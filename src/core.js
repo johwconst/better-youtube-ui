@@ -85,5 +85,11 @@
     return w.css;
   }
 
-  globalThis.VitroCore = { shortsTarget, pageOf, greetingKey, heroHeight, glassParams, htmlClasses, cssVars, wallpaperCss };
+  // O <html> deve ter o atributo "dark"? Com o Vitro ligado e forceDark, sim.
+  // Senão, devolve ao que o YouTube tinha (originalDark) para não estragar o tema claro.
+  function wantsDark(S, originalDark) {
+    return (S.enabled && S.forceDark) || !!originalDark;
+  }
+
+  globalThis.VitroCore = { wantsDark, shortsTarget, pageOf, greetingKey, heroHeight, glassParams, htmlClasses, cssVars, wallpaperCss };
 })();

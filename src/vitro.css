@@ -357,23 +357,20 @@ html.vt-on ytd-browse[page-subtype="home"] ytd-rich-grid-renderer {
 
 /* ---------- Destaque / saudação (home) ---------- */
 
-html.vt-on.vt-home.vt-hero ytd-browse[page-subtype="home"] {
-  padding-top: var(--vt-hero-h) !important;
-}
-
+/* A saudação fica no fluxo, dentro do ytd-rich-grid-renderer, antes dos chips.
+   As margens laterais são alinhadas aos cartões pelo content.js. */
 #vt-hero {
   display: none;
-  position: absolute;
-  top: var(--vt-top, 80px);
+  position: relative;
   height: var(--vt-hero-h);
   box-sizing: border-box;
+  grid-column: 1 / -1; /* caso a grade vire display:grid */
   padding: 24px 0 18px;
   flex-direction: column;
   justify-content: flex-end;
   color: #f1f1f1;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   pointer-events: none;
-  z-index: 1;
 }
 html.vt-on.vt-home.vt-hero #vt-hero {
   display: flex;

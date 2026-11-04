@@ -16,11 +16,14 @@ const lockup = (title, href = "/watch?v=abc123def45") => `
     </yt-lockup-view-model>
   </ytd-rich-item-renderer>`;
 
-const shell = (page) => `<!doctype html>
-<html dark lang="en">
+const shell = (page, { light = false } = {}) => `<!doctype html>
+<html${light ? "" : " dark"} lang="en">
 <head><meta charset="utf-8"><title>YouTube</title>
 <style>
-  body { margin: 0; font-family: sans-serif; color: #f1f1f1; }
+  /* paleta como a do YouTube: depende de html[dark] */
+  html { --yt-sys-color-baseline--text-primary: #0f0f0f; }
+  html[dark] { --yt-sys-color-baseline--text-primary: #f1f1f1; }
+  body { margin: 0; font-family: sans-serif; color: var(--yt-sys-color-baseline--text-primary); }
   ytd-app, ytd-page-manager, ytd-browse, ytd-rich-grid-renderer, ytd-masthead,
   ytd-rich-item-renderer, ytd-rich-section-renderer, ytd-watch-flexy { display: block; }
   #masthead-container { position: fixed; top: 0; left: 0; right: 0; height: 56px; z-index: 2020; }
@@ -51,7 +54,7 @@ const shell = (page) => `<!doctype html>
 </ytd-app>
 </body></html>`;
 
-export const homePage = () =>
+export const homePage = ({ light = false } = {}) =>
   shell(`
   <ytd-browse page-subtype="home">
     <ytd-rich-grid-renderer>
@@ -72,7 +75,7 @@ export const homePage = () =>
         ${lockup("Normal video 3")}
       </div>
     </ytd-rich-grid-renderer>
-  </ytd-browse>`);
+  </ytd-browse>`, { light });
 
 export const watchPage = ({ ad = false } = {}) =>
   shell(`

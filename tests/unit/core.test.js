@@ -96,3 +96,12 @@ test("wallpaperCss escolhe imagem própria, id ou padrão", () => {
   // padrão inexistente cai no primeiro
   assert.equal(C.wallpaperCss(walls, "x", null, "y"), "A");
 });
+
+test("wantsDark: força com Vitro ligado e forceDark, senão respeita o original", () => {
+  assert.equal(C.wantsDark({ ...D, enabled: true, forceDark: true }, false), true);
+  assert.equal(C.wantsDark({ ...D, enabled: true, forceDark: false }, false), false);
+  assert.equal(C.wantsDark({ ...D, enabled: false, forceDark: true }, false), false);
+  // quem já usa tema escuro continua no escuro mesmo desligando
+  assert.equal(C.wantsDark({ ...D, enabled: false, forceDark: false }, true), true);
+  assert.equal(C.wantsDark({ ...D, enabled: true, forceDark: false }, true), true);
+});

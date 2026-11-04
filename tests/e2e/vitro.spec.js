@@ -49,7 +49,7 @@ test.describe("home", () => {
     await expect(page.locator(".vt-test-guide-home")).toBeVisible();
   });
 
-  test("saudação aparece acima do feed, sem sobrepor (regressão v1.1.0)", async ({ yt }) => {
+  test("saudação fica no fluxo, antes dos chips, alinhada aos cartões", async ({ yt }) => {
     const page = await yt("/");
     const hero = page.locator("#vt-hero");
     await expect(hero).toBeVisible();
@@ -57,11 +57,80 @@ test.describe("home", () => {
     await expect(hero.locator(".vt-title span")).toHaveText("good to see you");
     await expect(hero.locator(".vt-section")).toHaveText("Recommended");
 
-    const pad = parseFloat(await cssOf(page.locator('ytd-browse[page-subtype="home"]'), "paddingTop"));
-    expect(pad).toBeGreaterThanOrEqual(300);
+    // dentro da grade da home, logo antes do #header (chips)
+    const placement = await hero.evaluate((el) => ({
+      parent: el.parentElement.tagName.toLowerCase(),
+      next: el.nextElementSibling?.id,
+    }));
+    expect(placement).toEqual({ parent: "ytd-rich-grid-renderer", next: "header" });
+
+    // nada é sobreposto: chips e cartões começam depois da saudação
     const heroBox = await hero.boundingBox();
-    const gridBox = await page.locator("#contents.ytd-rich-grid-renderer").boundingBox();
-    expect(gridBox.y).toBeGreaterThanOrEqual(heroBox.y + heroBox.height - 1);
+    expect(heroBox.height).toBeGreaterThanOrEqual(300);
+    for (const sel of ["#header.ytd-rich-grid-renderer", "#contents.ytd-rich-grid-renderer"]) {
+      const box = await page.locator(sel).boundingBox();
+      expect(box.y).toBeGreaterThanOrEqual(heroBox.y + heroBox.height - 1);
+    }
+    // borda esquerda alinhada à do primeiro cartão
+    const card = await page.locator(".ytLockupViewModelHost").first().boundingBox();
+    expect(Math.abs(heroBox.x - card.x)).toBeLessThanOrEqual(1);
+  });
+
+  test("saudação continua alinhada ao mudar a largura da janela", async ({ yt }) => {
+    const page = await yt("/");
+    await page.setViewportSize({ width: 1000, height: 800 });
+    await expect
+      .poll(async () => {
+        const h = await page.locator("#vt-hero").boundingBox();
+        const c = await page.locator(".ytLockupViewModelHost").first().boundingBox();
+        return Math.round(Math.abs(h.x - c.x));
+      })
+      .toBeLessThanOrEqual(1);
+  });
+
+  test("saudação espera a grade quando ela é montada depois", async ({ yt }) => {
+    const page = await yt("/");
+    // simula o YouTube recriando a grade (ex.: navegação SPA)
+    await page.evaluate(() => {
+      const grid = document.querySelector("ytd-rich-grid-renderer");
+      const clone = grid.cloneNode(true);
+      clone.querySelector("#vt-hero")?.remove();
+      const parent = grid.parentElement;
+      grid.remove();
+      setTimeout(() => {
+        parent.append(clone);
+        document.dispatchEvent(new Event("yt-page-data-updated"));
+      }, 200);
+    });
+    await expect(page.locator("ytd-rich-grid-renderer > #vt-hero")).toBeVisible();
+  });
+});
+
+test.describe("tema escuro", () => {
+  test("força o tema escuro quando o YouTube está no claro", async ({ yt }) => {
+    const page = await yt("/?light=1");
+    await expect(page.locator("html")).toHaveAttribute("dark", "");
+    expect(await cssOf(page.locator("body"), "color")).toBe("rgb(241, 241, 241)");
+    // o YouTube tentando voltar ao claro é revertido
+    await page.evaluate(() => document.documentElement.removeAttribute("dark"));
+    await expect(page.locator("html")).toHaveAttribute("dark", "");
+  });
+
+  test("desligar devolve o tema claro original", async ({ yt }) => {
+    const page = await yt("/?light=1");
+    await page.locator("#vt-edit-btn").click();
+    await page.locator('#vt-editor .vt-tab[data-id="vidro"]').click();
+    await page.locator("#vt-panel .vt-row", { hasText: "Force dark theme" }).locator(".vt-switch").click();
+    await expect(page.locator("html")).not.toHaveAttribute("dark");
+    expect(await cssOf(page.locator("body"), "color")).toBe("rgb(15, 15, 15)");
+  });
+
+  test("desligar não tira o escuro de quem já usa tema escuro", async ({ yt, popup }) => {
+    const page = await yt("/");
+    const p = await popup();
+    await p.locator('.switch[data-key="forceDark"]').click();
+    await page.waitForTimeout(300);
+    await expect(page.locator("html")).toHaveAttribute("dark", "");
   });
 });
 
@@ -109,7 +178,9 @@ test.describe("editor", () => {
     await page.locator('#vt-editor .vt-tab[data-id="destaque"]').click();
     await page.locator("#vt-panel .vt-head .vt-switch").click();
     await expect(page.locator("#vt-hero")).toBeHidden();
-    expect(parseFloat(await cssOf(page.locator('ytd-browse[page-subtype="home"]'), "paddingTop"))).toBe(0);
+    // sem a saudação, os chips voltam para o topo do feed
+    const header = await page.locator("#header.ytd-rich-grid-renderer").boundingBox();
+    expect(header.y).toBeLessThan(150);
   });
 });
 

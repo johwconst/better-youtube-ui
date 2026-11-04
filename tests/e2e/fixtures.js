@@ -27,7 +27,8 @@ export const test = base.extend({
       const url = new URL(route.request().url());
       if (route.request().resourceType() !== "document") return route.fulfill({ status: 204 });
       const ad = url.searchParams.has("ad");
-      const body = url.pathname === "/watch" ? watchPage({ ad }) : homePage();
+      const light = url.searchParams.has("light");
+      const body = url.pathname === "/watch" ? watchPage({ ad }) : homePage({ light });
       return route.fulfill({ status: 200, contentType: "text/html; charset=utf-8", body });
     });
 
