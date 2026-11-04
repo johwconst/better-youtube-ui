@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { homePage, watchPage } from "./fake-youtube.js";
+import { homePage, searchPage, watchPage } from "./fake-youtube.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const CHROMIUM = process.env.CHROMIUM_PATH || "/usr/bin/chromium";
@@ -28,7 +28,8 @@ export const test = base.extend({
       if (route.request().resourceType() !== "document") return route.fulfill({ status: 204 });
       const ad = url.searchParams.has("ad");
       const light = url.searchParams.has("light");
-      const body = url.pathname === "/watch" ? watchPage({ ad }) : homePage({ light });
+      const body =
+        url.pathname === "/watch" ? watchPage({ ad }) : url.pathname === "/results" ? searchPage() : homePage({ light });
       return route.fulfill({ status: 200, contentType: "text/html; charset=utf-8", body });
     });
 

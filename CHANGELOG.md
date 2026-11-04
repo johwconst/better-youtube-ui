@@ -21,6 +21,9 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - Roadmap no README (pt e en).
 - Testes: 45 unitários (`node:test`) e 33 E2E (Playwright no Chromium do sistema com YouTube falso). `npm test`, `npm run test:e2e`.
 
+### Corrigido
+- **Busca:** a seção inteira de resultados sumia quando trazia uma prateleira de Shorts, deixando a página em carregamento infinito ou sem parte dos vídeos. Agora só a prateleira é escondida.
+
 ### Alterado
 - `scripts/release.sh` inclui `_locales/` no zip.
 - Editor visual virou um **card flutuante centralizado** de vidro: cabeçalho com o raio e "Pronto", seções com ícones na lateral e controles à direita. Abre na primeira seção, pode ser arrastado pelo cabeçalho (sem sair da tela), navega com as setas do teclado e vira faixa de chips em telas estreitas.

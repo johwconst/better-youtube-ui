@@ -477,7 +477,6 @@ html.vt-no-shorts ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-short
 html.vt-no-shorts ytd-rich-section-renderer:has(a[href^="/shorts"]),
 html.vt-no-shorts ytd-reel-shelf-renderer,
 html.vt-no-shorts grid-shelf-view-model:has(a[href^="/shorts"]),
-html.vt-no-shorts ytd-item-section-renderer:has(grid-shelf-view-model a[href^="/shorts"]),
 html.vt-no-shorts ytm-shorts-lockup-view-model,
 html.vt-no-shorts ytm-shorts-lockup-view-model-v2,
 html.vt-no-shorts ytd-rich-item-renderer:has(a[href^="/shorts"]),

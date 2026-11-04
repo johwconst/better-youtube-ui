@@ -38,6 +38,14 @@ test.describe("home", () => {
     expect(await cssOf(card, "backgroundColor")).not.toBe("rgba(0, 0, 0, 0)");
   });
 
+  test("busca: esconde só a prateleira de Shorts, não a seção de resultados", async ({ yt }) => {
+    const page = await yt("/results?search_query=teste");
+    await expect(page.locator(".vt-test-grid-shelf")).toBeHidden();
+    await expect(page.locator(".vt-test-section")).toBeVisible();
+    await expect(page.locator(".vt-test-result")).toHaveCount(2);
+    for (const r of await page.locator(".vt-test-result").all()) await expect(r).toBeVisible();
+  });
+
   test("esconde Shorts e anúncios, mantém vídeos normais", async ({ yt }) => {
     const page = await yt("/");
     await expect(page.locator(".vt-test-shorts-shelf")).toBeHidden();

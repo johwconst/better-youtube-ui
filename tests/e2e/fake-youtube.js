@@ -26,7 +26,9 @@ const shell = (page, { light = false } = {}) => `<!doctype html>
   body { margin: 0; font-family: sans-serif; color: var(--yt-sys-color-baseline--text-primary); }
   ytd-rich-grid-renderer { display: flex; flex-direction: column; } /* como no YouTube real */
   ytd-app, ytd-page-manager, ytd-browse, ytd-masthead,
-  ytd-rich-item-renderer, ytd-rich-section-renderer, ytd-watch-flexy { display: block; }
+  ytd-rich-item-renderer, ytd-rich-section-renderer, ytd-watch-flexy,
+  ytd-search, ytd-section-list-renderer, ytd-item-section-renderer, ytd-video-renderer,
+  grid-shelf-view-model { display: block; }
   #masthead-container { position: fixed; top: 0; left: 0; right: 0; height: 56px; z-index: 2020; }
   #container.ytd-masthead { display: flex; justify-content: space-between; align-items: center; height: 56px; }
   #page-manager { display: block; margin-left: 240px; }
@@ -64,6 +66,25 @@ const shell = (page, { light = false } = {}) => `<!doctype html>
   <ytd-page-manager id="page-manager" class="ytd-app">${page}</ytd-page-manager>
 </ytd-app>
 </body></html>`;
+
+// Na busca, ytd-item-section-renderer é o contêiner dos resultados: a prateleira
+// de Shorts vem misturada com os vídeos dentro da mesma seção.
+export const searchPage = () =>
+  shell(`
+  <ytd-search>
+    <ytd-section-list-renderer>
+      <div id="contents" class="ytd-section-list-renderer">
+        <ytd-item-section-renderer class="vt-test-section">
+          <div id="contents" class="ytd-item-section-renderer">
+            <ytd-video-renderer class="vt-test-result"><a href="/watch?v=abc123def45">Result 1</a></ytd-video-renderer>
+            <grid-shelf-view-model class="vt-test-grid-shelf"><a href="/shorts/xyz987654">A short</a></grid-shelf-view-model>
+            <ytd-video-renderer class="vt-test-result"><a href="/watch?v=abc123def46">Result 2</a></ytd-video-renderer>
+          </div>
+        </ytd-item-section-renderer>
+        <ytd-continuation-item-renderer>Loading</ytd-continuation-item-renderer>
+      </div>
+    </ytd-section-list-renderer>
+  </ytd-search>`);
 
 export const homePage = ({ light = false } = {}) =>
   shell(`
