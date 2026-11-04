@@ -24,7 +24,8 @@ const shell = (page, { light = false } = {}) => `<!doctype html>
   html { --yt-sys-color-baseline--text-primary: #0f0f0f; }
   html[dark] { --yt-sys-color-baseline--text-primary: #f1f1f1; }
   body { margin: 0; font-family: sans-serif; color: var(--yt-sys-color-baseline--text-primary); }
-  ytd-app, ytd-page-manager, ytd-browse, ytd-rich-grid-renderer, ytd-masthead,
+  ytd-rich-grid-renderer { display: flex; flex-direction: column; } /* como no YouTube real */
+  ytd-app, ytd-page-manager, ytd-browse, ytd-masthead,
   ytd-rich-item-renderer, ytd-rich-section-renderer, ytd-watch-flexy { display: block; }
   #masthead-container { position: fixed; top: 0; left: 0; right: 0; height: 56px; z-index: 2020; }
   #container.ytd-masthead { display: flex; justify-content: space-between; align-items: center; height: 56px; }
