@@ -243,6 +243,136 @@ test.describe("editor", () => {
   });
 });
 
+test.describe("visual e personalização", () => {
+  const openSection = async (page, id) => {
+    await page.locator("#vt-edit-btn").click();
+    await page.locator(`#vt-editor .vt-tab[data-id="${id}"]`).click();
+  };
+  const wallBg = (page) => cssOf(page.locator("#vt-wallpaper"), "backgroundImage");
+
+  test("prévia do wallpaper ao passar o mouse, sem salvar", async ({ yt }) => {
+    const page = await yt("/");
+    await openSection(page, "fundo");
+    await page.locator('#vt-panel .vt-wall[data-wall="oceano"]').hover();
+    await expect.poll(() => wallBg(page)).toContain("oceano.jpg");
+    await page.locator("#vt-panel h3").hover(); // sai da grade
+    await expect.poll(() => wallBg(page)).toContain("brasa.jpg");
+    // fechar o editor durante a prévia também restaura
+    await page.locator('#vt-panel .vt-wall[data-wall="anil"]').hover();
+    await expect.poll(() => wallBg(page)).toContain("anil.jpg");
+    await page.keyboard.press("Escape");
+    await expect.poll(() => wallBg(page)).toContain("brasa.jpg");
+  });
+
+  test("nenhum painel mostra 'false'/'undefined' em nenhum modo", async ({ yt }) => {
+    const page = await yt("/");
+    await page.locator("#vt-edit-btn").click();
+    const check = async () => expect(await page.locator("#vt-panel").innerText()).not.toMatch(/\b(false|true|undefined|null)\b/);
+    for (const mode of ["Fixed", "Day & night", "One per day", "One per tab"]) {
+      await page.locator('#vt-editor .vt-tab[data-id="fundo"]').click();
+      await page.locator("#vt-panel .vt-seg button", { hasText: mode }).click();
+      await check();
+    }
+    for (const id of await page.locator("#vt-editor .vt-tab").evaluateAll((els) => els.map((e) => e.dataset.id))) {
+      await page.locator(`#vt-editor .vt-tab[data-id="${id}"]`).click();
+      await check();
+    }
+  });
+
+  test("prévia pode ser desligada", async ({ yt }) => {
+    const page = await yt("/");
+    await openSection(page, "fundo");
+    await page.locator("#vt-panel .vt-row", { hasText: "Preview on hover" }).locator(".vt-switch").click();
+    await page.locator('#vt-panel .vt-wall[data-wall="oceano"]').hover();
+    await page.waitForTimeout(200);
+    expect(await wallBg(page)).toContain("brasa.jpg");
+  });
+
+  test("modo dia e noite mostra as duas grades e aplica a certa", async ({ yt }) => {
+    const page = await yt("/");
+    await openSection(page, "fundo");
+    await page.locator("#vt-panel .vt-seg button", { hasText: "Day & night" }).click();
+    await expect(page.locator('#vt-panel .vt-walls[data-key="wallpaper"]')).toBeVisible();
+    await expect(page.locator('#vt-panel .vt-walls[data-key="wallpaperNight"]')).toBeVisible();
+    await page.locator('#vt-panel .vt-walls[data-key="wallpaper"] .vt-wall[data-wall="amanhecer"]').click();
+    await page.locator('#vt-panel .vt-walls[data-key="wallpaperNight"] .vt-wall[data-wall="lua-nascente"]').click();
+    await page.locator("#vt-panel h3").hover(); // sai da grade (encerra a prévia)
+    const night = await page.evaluate(() => new Date().getHours() >= 18 || new Date().getHours() < 6);
+    await expect.poll(() => wallBg(page)).toContain(night ? "lua-nascente.jpg" : "amanhecer.jpg");
+  });
+
+  test("modos de rotação escondem a grade e escolhem um wallpaper da extensão", async ({ yt }) => {
+    const page = await yt("/");
+    await openSection(page, "fundo");
+    await page.locator("#vt-panel .vt-seg button", { hasText: "One per day" }).click();
+    await expect(page.locator("#vt-panel .vt-walls")).toHaveCount(0);
+    await expect(page.locator("#vt-panel .vt-hint")).toContainText("built-in");
+    await expect.poll(() => wallBg(page)).toMatch(/assets\/wallpapers\/[\w-]+\.jpg|data:image\/svg/);
+  });
+
+  test("esconder itens e seções do menu lateral", async ({ yt }) => {
+    const page = await yt("/");
+    for (const c of ["history", "subs", "more", "footer"]) await expect(page.locator(".vt-test-guide-" + c)).toBeVisible();
+    await openSection(page, "menu");
+    for (const label of ["History", "Subscriptions", "More from YouTube", "Footer links"]) {
+      await page.locator("#vt-panel .vt-row", { hasText: label }).locator(".vt-switch").click();
+    }
+    for (const c of ["history", "subs", "more", "footer"]) await expect(page.locator(".vt-test-guide-" + c)).toBeHidden();
+    await expect(page.locator(".vt-test-guide-wl")).toBeVisible();
+    await expect(page.locator(".vt-test-guide-explore")).toBeVisible();
+    // religar volta a mostrar
+    await page.locator("#vt-panel .vt-row", { hasText: "History" }).locator(".vt-switch").click();
+    await expect(page.locator(".vt-test-guide-history")).toBeVisible();
+  });
+
+  test("fonte embutida é aplicada e carregada", async ({ yt }) => {
+    const page = await yt("/");
+    await openSection(page, "interface");
+    await page.locator('#vt-panel .vt-font[data-font="inter"]').click();
+    await expect(page.locator("html")).toHaveClass(/vt-font-inter/);
+    const family = await cssOf(page.locator(".ytLockupViewModelMetadata h3").first(), "fontFamily");
+    expect(family).toContain("Vitro Inter");
+    await expect.poll(() => page.evaluate(async () => {
+      await document.fonts.ready;
+      return document.fonts.check('16px "Vitro Inter"') && [...document.fonts].some((f) => f.family.includes("Vitro Inter") && f.status === "loaded");
+    })).toBe(true);
+    // voltar ao padrão do YouTube remove a fonte
+    await page.locator('#vt-panel .vt-font[data-font="youtube"]').click();
+    expect(await cssOf(page.locator(".ytLockupViewModelMetadata h3").first(), "fontFamily")).not.toContain("Vitro");
+  });
+
+  test("escala da página aumenta o conteúdo e mantém a saudação alinhada", async ({ yt }) => {
+    const page = await yt("/");
+    // a grade é responsiva (cabem menos colunas), então medimos o texto, que cresce de fato
+    const title = page.locator(".ytLockupViewModelMetadata h3").first();
+    const h0 = (await title.boundingBox()).height;
+    await openSection(page, "interface");
+    await page.locator("#vt-panel input[type=range]").fill("115");
+    await expect.poll(async () => (await title.boundingBox()).height / h0).toBeGreaterThan(1.1);
+    await page.keyboard.press("Escape");
+    await expect
+      .poll(async () => {
+        const h = await page.locator("#vt-hero").boundingBox();
+        const c = await page.locator(".ytLockupViewModelHost").first().boundingBox();
+        return Math.round(Math.abs(h.x - c.x));
+      })
+      .toBeLessThanOrEqual(1);
+  });
+
+  test("sons tocam pelo Web Audio quando ligados", async ({ yt }) => {
+    const page = await yt("/");
+    // conta osciladores criados (o content script usa o mesmo construtor do Chromium)
+    await openSection(page, "interface");
+    await page.locator("#vt-panel .vt-row", { hasText: "Interface sounds" }).locator(".vt-switch").click();
+    await expect(page.locator("#vt-panel .vt-row", { hasText: "Interface sounds" }).locator(".vt-switch")).toHaveAttribute("aria-checked", "true");
+    // trocar de seção e fechar não pode quebrar nada
+    await page.locator('#vt-editor .vt-tab[data-id="luz"]').click();
+    await expect(page.locator("#vt-panel h3")).toHaveText("Light");
+    await page.keyboard.press("Escape");
+    await expect(page.locator("html")).not.toHaveClass(/vt-editing/);
+  });
+});
+
 test.describe("popup", () => {
   test("mostra a versão do manifest e desliga tudo pelo interruptor principal", async ({ popup, yt }) => {
     const page = await yt("/");

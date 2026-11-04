@@ -45,10 +45,20 @@ const shell = (page, { light = false } = {}) => `<!doctype html>
   </div>
   <tp-yt-app-drawer id="guide" style="position:fixed;top:56px;left:0;bottom:0;width:240px">
     <div id="contentContainer" style="position:absolute;top:0;bottom:0;left:0;width:240px">
-      <div id="guide-content"><div id="guide-inner-content">
-        <ytd-guide-entry-renderer class="vt-test-guide-home" active><a title="Home" href="/">Home</a></ytd-guide-entry-renderer>
-        <ytd-guide-entry-renderer class="vt-test-guide-shorts"><a title="Shorts" href="/shorts/">Shorts</a></ytd-guide-entry-renderer>
-      </div></div>
+      <div id="guide-content"><div id="guide-inner-content"><div id="sections">
+        <ytd-guide-section-renderer>
+          <ytd-guide-entry-renderer class="vt-test-guide-home" active><a title="Home" href="/">Home</a></ytd-guide-entry-renderer>
+          <ytd-guide-entry-renderer class="vt-test-guide-shorts"><a title="Shorts" href="/shorts/">Shorts</a></ytd-guide-entry-renderer>
+        </ytd-guide-section-renderer>
+        <ytd-guide-section-renderer class="vt-test-guide-subs"><a href="/feed/subscriptions">Subscriptions</a></ytd-guide-section-renderer>
+        <ytd-guide-section-renderer>
+          <ytd-guide-entry-renderer class="vt-test-guide-history"><a href="/feed/history">History</a></ytd-guide-entry-renderer>
+          <ytd-guide-entry-renderer class="vt-test-guide-wl"><a href="/playlist?list=WL">Watch later</a></ytd-guide-entry-renderer>
+        </ytd-guide-section-renderer>
+        <ytd-guide-section-renderer class="vt-test-guide-more"><a href="/premium">Premium</a></ytd-guide-section-renderer>
+        <ytd-guide-section-renderer class="vt-test-guide-explore"><a href="/feed/storefront?bp=x">Movies</a></ytd-guide-section-renderer>
+        <ytd-guide-section-renderer class="vt-test-guide-settings"><a href="/reporthistory">Report history</a></ytd-guide-section-renderer>
+      </div><div id="footer" class="vt-test-guide-footer">About · Press</div></div></div>
     </div>
   </tp-yt-app-drawer>
   <ytd-page-manager id="page-manager" class="ytd-app">${page}</ytd-page-manager>

@@ -547,6 +547,57 @@ html.vt-no-merch #ticket-shelf {
 }
 
 /* =========================================================================
+   Interface: fontes embutidas e escala da página
+   As fontes vêm de dentro da extensão (__MSG_@@extension_id__ é trocado pelo
+   Chrome pelo id real), então não há requisição para fora.
+   ========================================================================= */
+
+@font-face {
+  font-family: "Vitro Inter";
+  src: url("chrome-extension://__MSG_@@extension_id__/assets/fonts/inter.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Vitro Manrope";
+  src: url("chrome-extension://__MSG_@@extension_id__/assets/fonts/manrope.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Vitro Outfit";
+  src: url("chrome-extension://__MSG_@@extension_id__/assets/fonts/outfit.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+html.vt-font-system {
+  --vt-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+html.vt-font-inter {
+  --vt-font: "Vitro Inter", system-ui, sans-serif;
+}
+html.vt-font-manrope {
+  --vt-font: "Vitro Manrope", system-ui, sans-serif;
+}
+html.vt-font-outfit {
+  --vt-font: "Vitro Outfit", system-ui, sans-serif;
+}
+html.vt-has-font ytd-app,
+html.vt-has-font ytd-app *:not(svg):not(path),
+html.vt-has-font #vt-hero,
+html.vt-has-font #vt-hero *,
+html.vt-has-font #vt-editor,
+html.vt-has-font #vt-editor * {
+  font-family: var(--vt-font) !important;
+}
+
+/* Escala da página (só o conteúdo; barra superior e menu ficam iguais) */
+html.vt-on ytd-page-manager#page-manager {
+  zoom: var(--vt-ui-scale, 1);
+}
+
+/* =========================================================================
    Editor visual
    ========================================================================= */
 
@@ -886,6 +937,53 @@ html.vt-editing #vt-editor.vt-dragging {
 #vt-panel .vt-wall[aria-pressed="true"] {
   border-color: var(--vt-accent, #ff4d4d);
   opacity: 1;
+}
+
+/* subtítulo dentro de uma seção */
+#vt-panel .vt-sub {
+  margin: 16px 0 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+/* escolha de fonte: cada opção escrita na própria fonte */
+#vt-panel .vt-fonts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 8px;
+}
+#vt-panel .vt-font {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  text-align: left;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+#vt-panel .vt-font b {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+  font-family: inherit !important;
+}
+#vt-panel .vt-font span {
+  font-size: 11px;
+  opacity: 0.7;
+  font-family: inherit !important;
+}
+#vt-panel .vt-font:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+#vt-panel .vt-font[aria-pressed="true"] {
+  border-color: var(--vt-accent, #ff4d4d);
+  background: color-mix(in srgb, var(--vt-accent, #ff4d4d) 14%, transparent);
 }
 
 #vt-panel .vt-btn {

@@ -15,6 +15,9 @@ globalThis.VITRO_DEFAULTS = {
   wallpaper: "brasa", // id de VITRO_WALLPAPERS ou "custom"
   bgDim: 45, // %
   bgBlur: 0, // px
+  wallMode: "fixed", // fixed | schedule (dia e noite) | daily (um por dia) | tab (um por aba)
+  wallpaperNight: "noite", // usado no modo "schedule", das 18h às 6h
+  wallPreview: true, // prévia ao passar o mouse nas miniaturas
 
   // Destaque (hero da home)
   hero: true,
@@ -27,6 +30,7 @@ globalThis.VITRO_DEFAULTS = {
 
   // Menu lateral
   sidebarGlass: true,
+  guideHide: [], // ids de VITRO_GUIDE_ITEMS escondidos do menu lateral
 
   // Cartões
   cards: true,
@@ -46,6 +50,11 @@ globalThis.VITRO_DEFAULTS = {
   glassBlur: 14, // px
   glassAlpha: 48, // %
 
+  // Interface
+  font: "youtube", // youtube | system | inter | manrope | outfit
+  uiScale: 100, // % (zoom da página)
+  sounds: false, // sons sutis no editor
+
   // Página de vídeo
   room: true,
 };
@@ -54,11 +63,13 @@ globalThis.VITRO_DEFAULTS = {
 // (de versões antigas) e valores com tipo errado (storage corrompido).
 globalThis.vitroMerge = function (saved) {
   const D = globalThis.VITRO_DEFAULTS;
-  const out = { ...D };
+  const out = { ...D, guideHide: [...D.guideHide] };
   if (saved && typeof saved === "object") {
     for (const k of Object.keys(D)) {
       const v = saved[k];
-      if (typeof v === typeof D[k] && (typeof v !== "number" || Number.isFinite(v))) out[k] = v;
+      if (Array.isArray(D[k])) {
+        if (Array.isArray(v)) out[k] = [...new Set(v.filter((x) => typeof x === "string"))];
+      } else if (typeof v === typeof D[k] && (typeof v !== "number" || Number.isFinite(v))) out[k] = v;
     }
   }
   return out;
@@ -72,3 +83,18 @@ globalThis.vitroLoad = async function () {
 globalThis.vitroSave = function (settings) {
   return chrome.storage.sync.set({ settings });
 };
+
+// Itens do menu lateral que podem ser escondidos (id → seletor do YouTube)
+globalThis.VITRO_GUIDE_ITEMS = [
+  ["subscriptions", 'ytd-guide-section-renderer:has(a[href="/feed/subscriptions"])'],
+  ["history", 'ytd-guide-entry-renderer:has(a[href="/feed/history"])'],
+  ["playlists", 'ytd-guide-entry-renderer:has(a[href="/feed/playlists"])'],
+  ["watchLater", 'ytd-guide-entry-renderer:has(a[href="/playlist?list=WL"])'],
+  ["liked", 'ytd-guide-entry-renderer:has(a[href="/playlist?list=LL"])'],
+  ["yourVideos", 'ytd-guide-entry-renderer:has(a[href^="https://studio.youtube.com"])'],
+  ["downloads", 'ytd-guide-entry-renderer:has(a[href="/feed/downloads"])'],
+  ["more", 'ytd-guide-section-renderer:has(a[href="/premium"])'],
+  ["explore", 'ytd-guide-section-renderer:has(a[href^="/feed/storefront"])'],
+  ["settings", 'ytd-guide-section-renderer:has(a[href="/reporthistory"])'],
+  ["footer", "tp-yt-app-drawer#guide #footer"],
+];

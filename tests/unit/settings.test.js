@@ -49,14 +49,27 @@ test("vitroLoad lê do chrome.storage.sync e vitroSave grava", async () => {
 
 test("padrões têm valores dentro das faixas dos controles do editor", () => {
   const D = load().VITRO_DEFAULTS;
-  const ranges = { bgDim: [0, 90], bgBlur: [0, 40], cardText: [80, 130], feedWidth: [60, 100], lightDark: [0, 70], glassBlur: [0, 40], glassAlpha: [10, 90] };
+  const ranges = { uiScale: [85, 120], bgDim: [0, 90], bgBlur: [0, 40], cardText: [80, 130], feedWidth: [60, 100], lightDark: [0, 70], glassBlur: [0, 40], glassAlpha: [10, 90] };
   for (const [k, [min, max]] of Object.entries(ranges)) {
     assert.ok(D[k] >= min && D[k] <= max, `${k}=${D[k]} fora de [${min}, ${max}]`);
   }
   assert.ok(["auto", "en", "pt"].includes(D.language));
+  assert.ok(["fixed", "schedule", "daily", "tab"].includes(D.wallMode));
+  assert.ok(["youtube", "system", "inter", "manrope", "outfit"].includes(D.font));
+  assert.deepEqual(plain(D.guideHide), []);
   assert.ok(["glass", "frost", "solid"].includes(D.glassStyle));
   assert.ok(["below", "over"].includes(D.cardTitle));
   assert.ok(["default", "air", "dense"].includes(D.cardLayout));
   assert.match(D.accent, /^#[0-9a-f]{6}$/i);
   assert.match(D.lightColor, /^#[0-9a-f]{6}$/i);
+});
+
+test("vitroMerge: listas aceitam só strings, sem repetição, e não compartilham referência", () => {
+  const g = load();
+  const s = g.vitroMerge({ guideHide: ["history", 3, "history", null, "footer"] });
+  assert.deepEqual(plain(s.guideHide), ["history", "footer"]);
+  assert.deepEqual(plain(g.vitroMerge({ guideHide: "history" }).guideHide), []);
+  const a = g.vitroMerge({});
+  a.guideHide.push("x");
+  assert.deepEqual(plain(g.VITRO_DEFAULTS.guideHide), []);
 });

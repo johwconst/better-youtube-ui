@@ -25,7 +25,8 @@
     {
       "resources": [
         "assets/wallpapers/*",
-        "assets/thumbs/*"
+        "assets/thumbs/*",
+        "assets/fonts/*.woff2"
       ],
       "matches": [
         "*://www.youtube.com/*"

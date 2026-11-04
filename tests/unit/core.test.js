@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { loadScripts, plain } from "./helpers.js";
 
 const g = loadScripts(["src/settings.js", "src/core.js"]);
+const at = (h, day = 10) => new Date(2026, 0, day, h, 30);
 const C = g.VitroCore;
 const D = g.VITRO_DEFAULTS;
 
@@ -104,4 +105,52 @@ test("wantsDark: força com Vitro ligado e forceDark, senão respeita o original
   // quem já usa tema escuro continua no escuro mesmo desligando
   assert.equal(C.wantsDark({ ...D, enabled: false, forceDark: false }, true), true);
   assert.equal(C.wantsDark({ ...D, enabled: true, forceDark: false }, true), true);
+});
+
+test("activeWallpaperId: modo fixo usa o escolhido", () => {
+  assert.equal(C.activeWallpaperId({ ...D, wallMode: "fixed", wallpaper: "rubi" }, ["rubi", "anil"], at(23), 0.5), "rubi");
+});
+
+test("activeWallpaperId: dia e noite troca às 18h e às 6h", () => {
+  const S = { ...D, wallMode: "schedule", wallpaper: "amanhecer", wallpaperNight: "noite" };
+  const ids = ["amanhecer", "noite"];
+  assert.equal(C.activeWallpaperId(S, ids, at(5), 0), "noite");
+  assert.equal(C.activeWallpaperId(S, ids, new Date(2026, 0, 10, 6, 0), 0), "amanhecer");
+  assert.equal(C.activeWallpaperId(S, ids, at(17), 0), "amanhecer");
+  assert.equal(C.activeWallpaperId(S, ids, new Date(2026, 0, 10, 18, 0), 0), "noite");
+});
+
+test("activeWallpaperId: um por dia muda à meia-noite e percorre todos", () => {
+  const S = { ...D, wallMode: "daily" };
+  const ids = ["a", "b", "c", "custom"];
+  const seen = new Set();
+  for (let d = 1; d <= 6; d++) {
+    // mesmo dia, horas diferentes → mesmo papel de parede
+    assert.equal(C.activeWallpaperId(S, ids, at(1, d), 0), C.activeWallpaperId(S, ids, at(23, d), 0));
+    seen.add(C.activeWallpaperId(S, ids, at(12, d), 0));
+  }
+  assert.deepEqual([...seen].sort(), ["a", "b", "c"]); // nunca "custom"
+  assert.notEqual(C.activeWallpaperId(S, ids, at(12, 1), 0), C.activeWallpaperId(S, ids, at(12, 2), 0));
+});
+
+test("activeWallpaperId: um por aba usa a semente da aba", () => {
+  const S = { ...D, wallMode: "tab" };
+  const ids = ["a", "b", "c"];
+  assert.equal(C.activeWallpaperId(S, ids, at(12), 0), "a");
+  assert.equal(C.activeWallpaperId(S, ids, at(12), 0.5), "b");
+  assert.equal(C.activeWallpaperId(S, ids, at(12), 0.9999), "c");
+});
+
+test("fontes: classe só para fontes reais e com a extensão ligada", () => {
+  const yt = C.htmlClasses({ ...D, font: "youtube" });
+  assert.equal(yt["vt-has-font"], false);
+  const inter = C.htmlClasses({ ...D, font: "inter" });
+  assert.equal(inter["vt-has-font"], true);
+  assert.equal(inter["vt-font-inter"], true);
+  assert.equal(inter["vt-font-manrope"], false);
+  assert.equal(C.htmlClasses({ ...D, font: "inter", enabled: false })["vt-has-font"], false);
+});
+
+test("escala da página vira variável CSS", () => {
+  assert.equal(C.cssVars({ ...D, uiScale: 110 })["--vt-ui-scale"], "1.1");
 });

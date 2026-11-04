@@ -81,14 +81,76 @@
     return true;
   }
 
+  const tabSeed = Math.random(); // modo "um por aba": sorteado uma vez por aba
+
+  function currentWallpaperCss() {
+    const ids = WALLS.map((w) => w.id);
+    const id = C.activeWallpaperId(S, ids, new Date(), tabSeed);
+    return C.wallpaperCss(WALLS, id, customImage, globalThis.VITRO_DEFAULTS.wallpaper);
+  }
+
   function updateWallpaper() {
-    if (!layers.wall) return;
-    const css = C.wallpaperCss(WALLS, S.wallpaper, customImage, globalThis.VITRO_DEFAULTS.wallpaper);
+    if (!layers.wall || previewing) return;
+    const css = currentWallpaperCss();
     if (layers.wall.dataset.bg !== css) {
       layers.wall.style.backgroundImage = css;
       layers.wall.dataset.bg = css;
     }
   }
+
+  // Prévia ao passar o mouse numa miniatura do editor
+  let previewing = false;
+  function previewWallpaper(css) {
+    if (!layers.wall) return;
+    if (css) {
+      previewing = true;
+      layers.wall.style.backgroundImage = css;
+    } else {
+      previewing = false;
+      layers.wall.dataset.bg = "";
+      updateWallpaper();
+    }
+  }
+
+  // Dia/noite e "um por dia" viram sozinhos: confere a cada minuto
+  setInterval(() => {
+    if (S.enabled && (S.wallMode === "schedule" || S.wallMode === "daily")) updateWallpaper();
+  }, 60000);
+
+  // Regras para esconder itens do menu lateral, geradas da lista em settings.js
+  (() => {
+    const style = document.createElement("style");
+    style.id = "vt-guide-rules";
+    style.textContent = globalThis.VITRO_GUIDE_ITEMS.map(([id, sel]) => `html.vt-gh-${id} ${sel}{display:none!important}`).join("\n");
+    (document.head || html).append(style);
+  })();
+
+  // Sons sutis (sintetizados, sem arquivos). Só tocam após um clique do usuário.
+  const sound = (() => {
+    let ctx;
+    const NOTES = { tick: [880, 0.03], on: [1180, 0.05], off: [620, 0.05], open: [520, 0.09], close: [420, 0.08] };
+    return (kind) => {
+      if (!S.sounds) return;
+      try {
+        ctx ||= new AudioContext();
+        const [freq, dur] = NOTES[kind] || NOTES.tick;
+        const t0 = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, t0);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.8, t0 + dur);
+        gain.gain.setValueAtTime(0.0001, t0);
+        gain.gain.exponentialRampToValueAtTime(0.05, t0 + 0.006);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.02);
+      } catch {
+        /* áudio indisponível */
+      }
+    };
+  })();
 
   // Luz que segue o cursor (rAF para não pesar)
   let mx = 0, my = 0, lightRaf = 0;
@@ -273,8 +335,10 @@
     if (!c.width) return;
     const item = contents.querySelector("ytd-rich-item-renderer");
     const m = item ? parseFloat(getComputedStyle(item).marginLeft) || 0 : 8;
-    hero.style.marginLeft = Math.max(0, c.left - g.left + m) + "px";
-    hero.style.marginRight = Math.max(0, g.right - c.right + m) + "px";
+    // medidas vêm em px da tela; as margens são aplicadas dentro do zoom da página
+    const z = S.uiScale / 100 || 1;
+    hero.style.marginLeft = Math.max(0, (c.left - g.left) / z + m) + "px";
+    hero.style.marginRight = Math.max(0, (g.right - c.right) / z + m) + "px";
   }
   const heroAlign = new ResizeObserver(() => alignHero());
 
@@ -355,6 +419,7 @@
     let saveTimer = 0;
 
     function set(key, value) {
+      sound(typeof value === "boolean" ? (value ? "on" : "off") : "tick");
       S[key] = value;
       applySettings();
       clearTimeout(saveTimer);
@@ -369,7 +434,7 @@
         if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
         else if (v !== false && v != null) el.setAttribute(k, v === true ? "" : v);
       }
-      el.append(...kids.flat().filter((k) => k != null));
+      el.append(...kids.flat(Infinity).filter((k) => k != null && k !== false));
       return el;
     };
     const toggle = (label, key) =>
@@ -406,21 +471,57 @@
           saveTimer = setTimeout(() => globalThis.vitroSave(S), 400);
         } }));
 
-    function wallpapers() {
+    // Grade de miniaturas ligada a uma configuração ("wallpaper" ou "wallpaperNight")
+    function wallGrid(key) {
+      const hover = (css) => S.wallPreview && { onmouseenter: () => previewWallpaper(css), onmouseleave: () => previewWallpaper(null) };
+      const pick = (id) => () => {
+        previewWallpaper(null);
+        set(key, id);
+      };
       const items = WALLS.map((w) =>
-        h("button", { class: "vt-wall", "aria-pressed": String(S.wallpaper === w.id), onclick: () => set("wallpaper", w.id) },
+        h("button", { class: "vt-wall", "data-wall": w.id, "aria-pressed": String(S[key] === w.id), onclick: pick(w.id), ...hover(w.css) },
           h("i", { style: `background-image:${w.thumb || w.css}` }), t("wall." + w.id)));
-      if (customImage)
-        items.push(h("button", { class: "vt-wall", "aria-pressed": String(S.wallpaper === "custom"), onclick: () => set("wallpaper", "custom") },
-          h("i", { style: `background-image:url("${customImage}")` }), t("wall.custom")));
+      if (customImage) {
+        const css = `url("${customImage}")`;
+        items.push(h("button", { class: "vt-wall", "data-wall": "custom", "aria-pressed": String(S[key] === "custom"), onclick: pick("custom"), ...hover(css) },
+          h("i", { style: `background-image:${css}` }), t("wall.custom")));
+      }
+      return h("div", { class: "vt-walls", "data-key": key, onmouseleave: () => previewWallpaper(null) }, items);
+    }
+
+    function wallpapers() {
       const file = h("input", { type: "file", accept: "image/*", style: "display:none", onchange: (e) => loadImage(e.target.files[0]) });
+      const mode = S.wallMode;
+      const rotating = mode === "daily" || mode === "tab";
       return [
-        h("div", { class: "vt-walls" }, items),
-        h("div", { class: "vt-row" },
+        seg(t("opt.wallMode"), "wallMode", [["fixed", t("opt.wallMode.fixed")], ["schedule", t("opt.wallMode.schedule")], ["daily", t("opt.wallMode.daily")], ["tab", t("opt.wallMode.tab")]]),
+        rotating && h("p", { class: "vt-hint" }, t("hint.wallRotate")),
+        mode === "schedule" && h("div", { class: "vt-sub" }, "☀ " + t("opt.wallDay")),
+        !rotating && wallGrid("wallpaper"),
+        mode === "schedule" && h("div", { class: "vt-sub" }, "☾ " + t("opt.wallNight")),
+        mode === "schedule" && wallGrid("wallpaperNight"),
+        !rotating && h("div", { class: "vt-row" },
           h("button", { class: "vt-btn", onclick: () => file.click() }, t("wall.upload")),
           customImage && h("button", { class: "vt-btn", onclick: removeImage }, t("wall.remove")), file),
+        toggle(t("opt.wallPreview"), "wallPreview"),
       ];
     }
+
+    // Interruptor de um item do menu lateral (ligado = aparece)
+    const guideToggle = (id) => {
+      const shown = !S.guideHide.includes(id);
+      const label = t("guide." + id);
+      return h("div", { class: "vt-row" }, h("span", {}, label),
+        h("button", { class: "vt-switch", role: "switch", "aria-checked": String(shown), "aria-label": label,
+          onclick: () => set("guideHide", shown ? [...S.guideHide, id] : S.guideHide.filter((x) => x !== id)) }));
+    };
+
+    const FONT_OPTS = [["youtube", null], ["system", "system-ui"], ["inter", '"Vitro Inter"'], ["manrope", '"Vitro Manrope"'], ["outfit", '"Vitro Outfit"']];
+    const fontPicker = () =>
+      h("div", { class: "vt-col" }, h("div", { class: "vt-lbl" }, h("span", {}, t("opt.font"))),
+        h("div", { class: "vt-fonts" }, FONT_OPTS.map(([id, family]) =>
+          h("button", { class: "vt-font", "data-font": id, "aria-pressed": String(S.font === id), onclick: () => set("font", id), style: family ? `font-family:${family}, sans-serif !important` : "" },
+            h("b", {}, "Aa"), h("span", {}, id === "youtube" || id === "system" ? t("opt.font." + id) : id[0].toUpperCase() + id.slice(1))))));
 
     async function loadImage(f) {
       if (!f) return;
@@ -452,7 +553,11 @@
       },
       menu: {
         flash: "guide", master: "sidebarGlass",
-        body: () => [h("p", { class: "vt-hint" }, t("hint.sidebar"))],
+        body: () => [
+          h("p", { class: "vt-hint" }, t("hint.sidebar")),
+          h("div", { class: "vt-sub" }, t("opt.guideShow")),
+          globalThis.VITRO_GUIDE_ITEMS.map(([id]) => guideToggle(id)),
+        ],
       },
       cartoes: {
         master: "cards",
@@ -475,6 +580,14 @@
           h("p", { class: "vt-hint" }, t("hint.forceDark")),
         ],
       },
+      interface: {
+        body: () => [
+          fontPicker(),
+          slider(t("opt.uiScale"), "uiScale", 85, 120, "%"),
+          toggle(t("opt.sounds"), "sounds"),
+          h("p", { class: "vt-hint" }, t("hint.sounds")),
+        ],
+      },
       video: { master: "room", body: () => [h("p", { class: "vt-hint" }, t("hint.room")), toggle(t("opt.hideRelated"), "hideRelated")] },
       limpeza: {
         body: () => [toggle(t("opt.hideShorts"), "hideShorts"), toggle(t("opt.blockAds"), "blockAds"), toggle(t("opt.hideEndscreens"), "hideEndscreens"), toggle(t("opt.hideMerch"), "hideMerch")],
@@ -494,6 +607,7 @@
       vidro: "M5 4h14v16H5z M5 9l6-5 M9 20L19 10",
       video: "M3 6h18v12H3z M10 9.5v5l4.5-2.5z",
       limpeza: "M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v6 M14 11v6",
+      interface: "M3 19 8 5l5 14 M5 14h6 M15 19v-5.5a2.5 2.5 0 0 1 5 0V19 M15 16h5",
     };
     function icon(d) {
       const NS = "http://www.w3.org/2000/svg";
@@ -570,13 +684,14 @@
       const active = document.activeElement;
       if (panel.contains(active) && active.type === "text") return;
       const scroll = panel.scrollTop;
-      panel.replaceChildren(head, ...p.body().flat());
+      panel.replaceChildren(head, ...p.body().flat(Infinity).filter((k) => k != null && k !== false));
       panel.scrollTop = scroll;
     }
 
     function openPanel(id) {
       if (!PANELS[id]) return;
       const changed = id !== current;
+      if (changed && current) sound("tick");
       current = id;
       renderPanel(id);
       if (changed) panel.scrollTop = 0;
@@ -597,11 +712,14 @@
 
     function open() {
       build();
+      if (!html.classList.contains("vt-editing")) sound("open");
       setClass("vt-editing", true);
       openPanel(current || Object.keys(PANELS)[0]);
       bar.querySelector('.vt-tab[aria-pressed="true"]')?.focus({ preventScroll: true });
     }
     function close() {
+      if (html.classList.contains("vt-editing")) sound("close");
+      previewWallpaper(null);
       flash(null);
       setClass("vt-editing", false);
       if (bar?.contains(document.activeElement)) document.getElementById("vt-edit-btn")?.focus();

@@ -59,6 +59,8 @@
       "vt-light": on && S.light,
       "vt-snow-on": on && S.hero && S.snow,
       "vt-room": on && S.room,
+      ...fontClasses(S, on),
+      ...guideClasses(S, on),
     };
   }
 
@@ -75,7 +77,44 @@
       "--vt-bg-blur": S.bgBlur + "px",
       "--vt-light-color": S.lightColor,
       "--vt-light-dark": String(S.lightDark / 100),
+      "--vt-ui-scale": String(S.uiScale / 100),
     };
+  }
+
+  const FONTS = ["system", "inter", "manrope", "outfit"]; // "youtube" = não mexe
+  function fontClasses(S, on) {
+    const out = { "vt-has-font": on && FONTS.includes(S.font) };
+    for (const f of FONTS) out["vt-font-" + f] = on && S.font === f;
+    return out;
+  }
+
+  // vt-gh-<id> esconde o item do menu lateral (regras geradas no content.js)
+  function guideClasses(S, on) {
+    const ids = (globalThis.VITRO_GUIDE_ITEMS || []).map(([id]) => id);
+    const hidden = new Set(Array.isArray(S.guideHide) ? S.guideHide : []);
+    return Object.fromEntries(ids.map((id) => ["vt-gh-" + id, on && hidden.has(id)]));
+  }
+
+  // Noite das 18h às 6h (mesma virada da saudação "Boa noite")
+  const isNight = (hour) => hour >= 18 || hour < 6;
+
+  // Dia local corrido desde 1970 (muda à meia-noite do fuso do usuário)
+  const localDay = (d) => Math.floor((d.getTime() - d.getTimezoneOffset() * 60000) / 86400000);
+
+  // Qual papel de parede mostrar agora, conforme o modo.
+  // `tabSeed` (0–1) é sorteado uma vez por aba para o modo "tab".
+  function activeWallpaperId(S, ids, now, tabSeed) {
+    const pool = ids.filter((id) => id !== "custom");
+    switch (S.wallMode) {
+      case "schedule":
+        return isNight(now.getHours()) ? S.wallpaperNight : S.wallpaper;
+      case "daily":
+        return pool.length ? pool[((localDay(now) % pool.length) + pool.length) % pool.length] : S.wallpaper;
+      case "tab":
+        return pool.length ? pool[Math.min(pool.length - 1, Math.floor(tabSeed * pool.length))] : S.wallpaper;
+      default:
+        return S.wallpaper;
+    }
   }
 
   // Valor CSS do background-image do papel de parede escolhido
@@ -91,5 +130,5 @@
     return (S.enabled && S.forceDark) || !!originalDark;
   }
 
-  globalThis.VitroCore = { wantsDark, shortsTarget, pageOf, greetingKey, heroHeight, glassParams, htmlClasses, cssVars, wallpaperCss };
+  globalThis.VitroCore = { activeWallpaperId, isNight, localDay, wantsDark, shortsTarget, pageOf, greetingKey, heroHeight, glassParams, htmlClasses, cssVars, wallpaperCss };
 })();

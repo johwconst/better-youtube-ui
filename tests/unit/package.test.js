@@ -82,6 +82,7 @@ test("CSS: toda classe e variável escrita pelo core é usada no vitro.css", () 
   const g = loadScripts(["src/settings.js", "src/core.js"]);
   const css = read("src/vitro.css");
   for (const cls of Object.keys(g.VitroCore.htmlClasses(g.VITRO_DEFAULTS))) {
+    if (cls.startsWith("vt-gh-")) continue; // regras geradas no content.js (teste abaixo)
     assert.ok(css.includes("." + cls), `classe sem CSS: ${cls}`);
   }
   for (const v of Object.keys(g.VitroCore.cssVars(g.VITRO_DEFAULTS))) {
@@ -101,4 +102,29 @@ test("CHANGELOG: tem seção Não lançado e a versão do manifest", () => {
   const log = read("CHANGELOG.md");
   assert.match(log, /^## \[Não lançado\]$/m);
   assert.match(log, new RegExp(`^## \\[${manifest.version.replace(/\./g, "\\.")}\\] - \\d{4}-\\d{2}-\\d{2}$`, "m"));
+});
+
+test("menu lateral: todo item escondível tem classe no core, regra gerada e tradução", () => {
+  const g = loadScripts(["src/settings.js", "src/core.js", "src/i18n.js"]);
+  const ids = g.VITRO_GUIDE_ITEMS.map(([id]) => id);
+  assert.equal(new Set(ids).size, ids.length);
+  const cls = g.VitroCore.htmlClasses({ ...g.VITRO_DEFAULTS, guideHide: ids });
+  for (const [id, sel] of g.VITRO_GUIDE_ITEMS) {
+    assert.equal(cls["vt-gh-" + id], true, id);
+    assert.ok(sel.trim(), id);
+    assert.ok(g.VITRO_I18N.en["guide." + id] && g.VITRO_I18N.pt["guide." + id], `sem tradução: ${id}`);
+  }
+  assert.match(read("src/content.js"), /VITRO_GUIDE_ITEMS\.map\(\(\[id, sel\]\) => `html\.vt-gh-\$\{id\} \$\{sel\}/);
+});
+
+test("fontes: arquivos, licenças, @font-face e web_accessible_resources", () => {
+  const css = read("src/vitro.css");
+  const res = manifest.web_accessible_resources.flatMap((r) => r.resources);
+  assert.ok(res.includes("assets/fonts/*.woff2"));
+  for (const f of ["inter", "manrope", "outfit"]) {
+    assert.ok(exists(`assets/fonts/${f}.woff2`), f);
+    assert.ok(exists(`assets/fonts/LICENSE-${f}.txt`), `licença ${f}`);
+    assert.ok(css.includes(`chrome-extension://__MSG_@@extension_id__/assets/fonts/${f}.woff2`), `@font-face ${f}`);
+    assert.ok(css.includes(`html.vt-font-${f}`), `classe ${f}`);
+  }
 });

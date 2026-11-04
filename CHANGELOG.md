@@ -15,7 +15,11 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - README em inglês (`README.md`) e em português (`README.pt-BR.md`), com links de troca.
 
 - Opção **Forçar tema escuro** (ligada por padrão), no painel Vidro e no popup: mantém a paleta escura do YouTube mesmo com a conta no tema claro; desligar devolve o tema original.
-- Testes: 36 unitários (`node:test`) e 24 E2E (Playwright no Chromium do sistema com YouTube falso). `npm test`, `npm run test:e2e`.
+- **Fundo:** modos de papel de parede — fixo, dia e noite (18h–6h), um por dia e um por aba — e prévia ao passar o mouse nas miniaturas.
+- **Menu lateral:** escolher quais itens e seções aparecem (inscrições, histórico, playlists, assistir mais tarde, curtidos, seus vídeos, downloads, Mais do YouTube, Explorar, configurações, rodapé).
+- **Interface** (seção nova): fontes embutidas Inter, Manrope e Outfit (OFL, sem requisição externa), fonte do sistema ou do YouTube; escala da página; sons suaves sintetizados no editor.
+- Roadmap no README (pt e en).
+- Testes: 45 unitários (`node:test`) e 33 E2E (Playwright no Chromium do sistema com YouTube falso). `npm test`, `npm run test:e2e`.
 
 ### Alterado
 - `scripts/release.sh` inclui `_locales/` no zip.
@@ -25,6 +29,7 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - Configurações salvas são saneadas (`vitroMerge`): chaves antigas e valores com tipo errado são descartados.
 
 ### Corrigido
+- Itens condicionais dos painéis do editor podiam aparecer como o texto "false".
 - Botão ⚡ do editor podia levar até 3s para aparecer quando a página já chegava pronta (achado pelos testes E2E).
 
 ## [1.1.0] - 2026-11-04

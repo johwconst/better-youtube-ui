@@ -23,8 +23,10 @@ Depois de editar o código, clique em ↻ no card da extensão e recarregue a ab
 
 | Área | Recursos |
 |---|---|
+| **Menu lateral** | Escolha quais itens e seções aparecem: inscrições, histórico, playlists, assistir mais tarde, curtidos, seus vídeos, downloads, "Mais do YouTube", Explorar, configurações e rodapé. |
+| **Interface** | Fontes embutidas (Inter, Manrope, Outfit), do sistema ou a do YouTube; escala da página (85–120%); sons suaves opcionais. |
 | **Vidro** | Barra superior em pílula flutuante, menu lateral e mini-menu em painéis de vidro. Estilos Vidro / Fosco / Sólido, desfoque e transparência ajustáveis. |
-| **Fundo** | 11 papéis de parede em imagem (padrão: **Brasa**) + 6 cenas em SVG gerado, ou sua própria imagem. Escurecer e desfoque. |
+| **Fundo** | 11 papéis de parede em imagem (padrão: **Brasa**) + 6 cenas em SVG gerado, ou sua própria imagem. Modos: fixo, **dia e noite** (troca às 18h / 6h), **um por dia** ou **um por aba**. **Prévia ao passar o mouse**. Escurecer e desfoque. |
 | **Destaque** | Saudação por horário ("Bom dia / Boa tarde / Boa noite") com data, seu nome em cor de destaque, neve opcional. |
 | **Cartões** | Fundo translúcido, cantos de 18px, sombra, animação ao passar o mouse. Título sob/sobre a imagem, tamanho do texto, disposição (Padrão/Ar/Denso), largura do feed, bordas. |
 | **Luz** | Halo que segue o cursor sobre o papel de parede, com escuridão ao redor. |
@@ -94,6 +96,7 @@ popup/               popup da extensão
 wallpapers/          imagens originais (fonte)
 assets/wallpapers/   imagens otimizadas usadas pela extensão (2560px, JPEG)
 assets/thumbs/       miniaturas do editor
+assets/fonts/        fontes embutidas (OFL)
 docs/                imagens do README
 tests/unit/          node:test
 tests/e2e/           Playwright + YouTube falso
@@ -115,6 +118,39 @@ magick wallpapers/$n.png -resize 240x135^ -gravity center -extent 240x135 -strip
 ```
 
 "Oceano" é uma foto de Richard Horvath no [Unsplash](https://unsplash.com/).
+
+As fontes Inter, Manrope e Outfit vêm embutidas sob a SIL Open Font License 1.1 (veja `assets/fonts/`).
+
+## Roadmap
+
+Ideias para as próximas versões, mais ou menos em ordem de prioridade. Sugestões são bem-vindas.
+
+### Próximos passos
+- [ ] **Temas prontos (presets)** — um clique aplica um visual completo (*Minimal*, *Cinema*, *Foco*, *Neon*); salvar suas combinações com nome.
+- [ ] **Cor de destaque automática** — tirada da cor dominante do papel de parede.
+- [ ] **Desfazer e restaurar por seção** — botão ↺ em cada seção e `Ctrl+Z` para o último ajuste.
+- [ ] **Exportar / importar configurações** — código ou arquivo para levar o visual a outro PC ou compartilhar.
+- [ ] **Atalho de teclado** — abrir/fechar o editor com `Alt+V`.
+
+### Foco e bem-estar
+- [ ] **Modo Foco** — esconde o feed da home, deixa só busca e inscrições.
+- [ ] **Esconder números** — views, likes e inscritos.
+- [ ] **Esconder comentários** por padrão, com botão para mostrar.
+- [ ] **Esconder vídeos já assistidos** do feed.
+- [ ] **Bloquear canais ou palavras** nos títulos.
+- [ ] **Lembrete de pausa / tempo assistido hoje**, na saudação.
+
+### Player
+- [ ] **Velocidade e qualidade padrão** (ex.: sempre 1.25× e 1080p).
+- [ ] **Modo cinema automático** ao abrir um vídeo.
+- [ ] **Captura de quadro** — salva um print do frame atual.
+- [ ] **Botão de Picture-in-Picture** sempre visível.
+- [ ] **Pular patrocínios (SponsorBlock)** — exige API externa e permissão nova.
+
+### Usabilidade do editor
+- [ ] **Busca de opções** — digitar "neve" ou "transparência" e ir direto ao controle.
+- [ ] **Prévia antes/depois** — segurar um botão para ver o YouTube original.
+- [ ] **Seção de acessibilidade** — reduzir animações, alto contraste, foco mais visível.
 
 ## Limitações
 

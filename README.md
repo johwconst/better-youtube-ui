@@ -23,8 +23,10 @@ After editing the code, click ↻ on the extension card and reload the YouTube t
 
 | Area | What it does |
 |---|---|
+| **Sidebar** | Choose which items and sections show: subscriptions, history, playlists, watch later, liked, your videos, downloads, "More from YouTube", Explore, settings and footer. |
+| **Interface** | Bundled fonts (Inter, Manrope, Outfit), system or YouTube's own; page scale (85–120%); optional soft interface sounds. |
 | **Glass** | Floating pill-shaped top bar, sidebar and mini sidebar as glass panels. Glass / Frosted / Solid styles, adjustable blur and transparency. |
-| **Background** | 11 image wallpapers (default: **Ember**) + 6 generated SVG scenes, or your own image. Dim and blur controls. |
+| **Background** | 11 image wallpapers (default: **Ember**) + 6 generated SVG scenes, or your own image. Modes: fixed, **day & night** (switches at 6 pm / 6 am), **one per day** or **one per tab**. Live **preview on hover**. Dim and blur controls. |
 | **Highlight** | Time-based greeting ("Good morning / Good afternoon / Good evening") with the date, your name in an accent color, optional snow. |
 | **Cards** | Translucent background, 18px corners, shadow, hover animation. Title below/over the thumbnail, text size, layout (Default/Airy/Dense), feed width, borders. |
 | **Light** | A glow that follows the cursor over the wallpaper, with darkness around it. |
@@ -94,6 +96,7 @@ popup/               extension popup
 wallpapers/          original images (source)
 assets/wallpapers/   optimized images used by the extension (2560px, JPEG)
 assets/thumbs/       editor thumbnails
+assets/fonts/        bundled fonts (OFL)
 docs/                README images
 tests/unit/          node:test
 tests/e2e/           Playwright + fake YouTube
@@ -115,6 +118,39 @@ magick wallpapers/$n.png -resize 240x135^ -gravity center -extent 240x135 -strip
 ```
 
 "Ocean" is a photo by Richard Horvath on [Unsplash](https://unsplash.com/).
+
+Fonts Inter, Manrope and Outfit are bundled under the SIL Open Font License 1.1 (see `assets/fonts/`).
+
+## Roadmap
+
+Ideas for upcoming versions, roughly in priority order. Suggestions are welcome.
+
+### Next up
+- [ ] **Presets** — one click applies a full look (*Minimal*, *Cinema*, *Focus*, *Neon*); save your own combinations by name.
+- [ ] **Auto accent color** — pick the accent from the wallpaper's dominant color.
+- [ ] **Undo and reset per section** — a ↺ button per section and `Ctrl+Z` for the last change.
+- [ ] **Export / import settings** — a code or file to move your look to another PC or share it.
+- [ ] **Keyboard shortcut** — open/close the editor with `Alt+V`.
+
+### Focus and well-being
+- [ ] **Focus mode** — hide the home feed, keep only search and subscriptions.
+- [ ] **Hide numbers** — views, likes and subscriber counts.
+- [ ] **Hide comments** by default, with a button to reveal them.
+- [ ] **Hide watched videos** from the feed.
+- [ ] **Block channels or keywords** in titles.
+- [ ] **Break reminder / time watched today**, shown in the greeting.
+
+### Player
+- [ ] **Default speed and quality** (e.g. always 1.25× and 1080p).
+- [ ] **Automatic theater mode** when opening a video.
+- [ ] **Frame capture** — save a screenshot of the current frame.
+- [ ] **Picture-in-Picture button** always visible.
+- [ ] **Skip sponsors (SponsorBlock)** — needs an external API and a new permission.
+
+### Editor usability
+- [ ] **Search settings** — type "snow" or "transparency" and jump to the control.
+- [ ] **Before/after preview** — hold a button to see the original YouTube.
+- [ ] **Accessibility section** — reduce motion, high contrast, stronger focus outline.
 
 ## Limitations
 
