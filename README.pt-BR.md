@@ -35,7 +35,7 @@ Depois de editar o código, clique em ↻ no card da extensão e recarregue a ab
 
 ## Como usar
 
-- Clique no **raio** ⚡ na barra superior do YouTube para abrir o editor visual. Escolha a área (Fundo, Destaque, Saudação…) e ajuste ao vivo. `Esc` ou **Pronto** fecha.
+- Clique no **raio** ⚡ na barra superior do YouTube para abrir o editor visual, um card de vidro flutuante que dá para arrastar. Escolha a área (Fundo, Destaque, Saudação…) e ajuste ao vivo. `Esc` ou **Pronto** fecha.
 
 ![Editor visual com o painel Fundo aberto](docs/editor.jpg)
 

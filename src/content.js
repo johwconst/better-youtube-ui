@@ -483,65 +483,136 @@
 
     const title = (id) => t("panel." + id);
 
+    // Ícones das seções (traços 24×24, mesmo estilo do raio)
+    const ICONS = {
+      fundo: "M4 5h16v14H4z M4 16l4.5-4.5 3.5 3.5 2.5-2.5L20 17 M15.5 9.5h.01",
+      destaque: "M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z",
+      saudacao: "M4 6h16v10H8l-4 4z M8 10h8 M8 13h5",
+      menu: "M4 4h6v16H4z M13 6h7 M13 10h7 M13 14h5",
+      cartoes: "M4 4h7v7H4z M13 4h7v7h-7z M4 13h7v7H4z M13 13h7v7h-7z",
+      luz: "M9 18h6 M10 21h4 M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z",
+      vidro: "M5 4h14v16H5z M5 9l6-5 M9 20L19 10",
+      video: "M3 6h18v12H3z M10 9.5v5l4.5-2.5z",
+      limpeza: "M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v6 M14 11v6",
+    };
+    function icon(d) {
+      const NS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(NS, "svg");
+      for (const [k, v] of Object.entries({ viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": 1.7, "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true" }))
+        svg.setAttribute(k, v);
+      const path = document.createElementNS(NS, "path");
+      path.setAttribute("d", d);
+      svg.append(path);
+      return svg;
+    }
+
     function build() {
       if (bar?.isConnected) return;
-      bar = h("div", { id: "vt-editor", role: "toolbar", "aria-label": t("editor.aria") },
-        h("span", { class: "vt-ed-label" }, t("editor.hint")),
+      panel = h("div", { id: "vt-panel", role: "tabpanel" });
+      const nav = h("nav", { class: "vt-nav", role: "tablist", "aria-orientation": "vertical" },
         Object.keys(PANELS).map((id) =>
-          h("button", { class: "vt-tab", "data-id": id, "aria-pressed": "false", onclick: () => openPanel(id) }, title(id))),
+          h("button", { class: "vt-tab", role: "tab", "data-id": id, "aria-pressed": "false", "aria-selected": "false", onclick: () => openPanel(id) },
+            icon(ICONS[id]), h("span", {}, title(id)))));
+      const head = h("header", { class: "vt-ed-head" },
+        h("div", { class: "vt-ed-brand" },
+          h("span", { class: "vt-ed-logo" }, boltIcon()),
+          h("div", { style: "min-width:0" }, h("strong", {}, "Vitro"), h("span", { class: "vt-ed-label" }, t("editor.hint")))),
         h("button", { class: "vt-done", onclick: () => close() }, t("editor.done")));
-      panel = h("div", { id: "vt-panel", role: "dialog" });
-      document.body.append(bar, panel);
+      head.addEventListener("pointerdown", startDrag);
+      bar = h("div", { id: "vt-editor", role: "dialog", "aria-label": t("editor.aria") }, head, h("div", { class: "vt-ed-body" }, nav, panel));
+      bar.style.setProperty("--vt-ed-x", drag.x + "px");
+      bar.style.setProperty("--vt-ed-y", drag.y + "px");
+      nav.addEventListener("keydown", navKeys);
+      document.body.append(bar);
+    }
+
+    // Arrastar o card pelo cabeçalho (posição lembrada enquanto a aba estiver aberta)
+    const drag = { x: 0, y: 0 };
+    function startDrag(e) {
+      if (e.button !== 0 || e.target.closest("button")) return;
+      const sx = e.clientX - drag.x, sy = e.clientY - drag.y;
+      const r = bar.getBoundingClientRect();
+      // limites: o card não sai da tela
+      const maxX = (innerWidth - r.width) / 2, maxY = (innerHeight - r.height) / 2;
+      const clamp = (v, m) => Math.max(-m, Math.min(m, v));
+      bar.classList.add("vt-dragging");
+      const move = (ev) => {
+        drag.x = clamp(ev.clientX - sx, maxX);
+        drag.y = clamp(ev.clientY - sy, maxY);
+        bar.style.setProperty("--vt-ed-x", drag.x + "px");
+        bar.style.setProperty("--vt-ed-y", drag.y + "px");
+      };
+      const up = () => {
+        bar.classList.remove("vt-dragging");
+        removeEventListener("pointermove", move);
+        removeEventListener("pointerup", up);
+      };
+      addEventListener("pointermove", move);
+      addEventListener("pointerup", up);
+    }
+
+    // Setas ↑/↓ (←/→ no celular) navegam entre as seções
+    function navKeys(e) {
+      const ids = Object.keys(PANELS);
+      const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+      if (!step) return;
+      e.preventDefault();
+      const next = ids[(ids.indexOf(current) + step + ids.length) % ids.length];
+      openPanel(next);
+      bar.querySelector(`.vt-tab[data-id="${next}"]`).focus();
     }
 
     function renderPanel(id) {
       const p = PANELS[id];
       const head = h("div", { class: "vt-head" }, h("h3", {}, title(id)),
-        p.master && h("button", { class: "vt-switch", role: "switch", "aria-checked": String(!!S[p.master]), "aria-label": t("editor.enable") + " " + title(id), onclick: () => set(p.master, !S[p.master]) }),
-        h("button", { class: "vt-x", "aria-label": t("editor.close"), onclick: () => openPanel(null) }, "✕"));
+        p.master && h("button", { class: "vt-switch", role: "switch", "aria-checked": String(!!S[p.master]), "aria-label": t("editor.enable") + " " + title(id), onclick: () => set(p.master, !S[p.master]) }));
       // preserva o foco em campos de texto ao re-renderizar
       const active = document.activeElement;
       if (panel.contains(active) && active.type === "text") return;
+      const scroll = panel.scrollTop;
       panel.replaceChildren(head, ...p.body().flat());
+      panel.scrollTop = scroll;
     }
 
     function openPanel(id) {
-      if (id === current || !id) {
-        current = null;
-        panel.classList.remove("vt-open");
-      } else {
-        current = id;
-        renderPanel(id);
-        panel.classList.add("vt-open");
-        const tab = bar.querySelector(`[data-id="${id}"]`).getBoundingClientRect();
-        const left = Math.min(Math.max(tab.left + tab.width / 2 - 150, 12), innerWidth - 312);
-        panel.style.left = left + "px";
-      }
-      bar.querySelectorAll(".vt-tab").forEach((t) => t.setAttribute("aria-pressed", String(t.dataset.id === current)));
-      for (const f of ["masthead", "guide", "hero"]) setClass("vt-flash-" + f, current && PANELS[current].flash === f);
+      if (!PANELS[id]) return;
+      const changed = id !== current;
+      current = id;
+      renderPanel(id);
+      if (changed) panel.scrollTop = 0;
+      bar.querySelectorAll(".vt-tab").forEach((tab) => {
+        const on = tab.dataset.id === current;
+        tab.setAttribute("aria-pressed", String(on));
+        tab.setAttribute("aria-selected", String(on));
+        tab.tabIndex = on ? 0 : -1;
+        // no celular a navegação vira uma faixa horizontal: mantém a seção visível
+        if (on && changed) tab.scrollIntoView({ block: "nearest", inline: "nearest" });
+      });
+      flash(PANELS[id].flash);
+    }
+
+    function flash(target) {
+      for (const f of ["masthead", "guide", "hero"]) setClass("vt-flash-" + f, target === f);
     }
 
     function open() {
       build();
       setClass("vt-editing", true);
+      openPanel(current || Object.keys(PANELS)[0]);
+      bar.querySelector('.vt-tab[aria-pressed="true"]')?.focus({ preventScroll: true });
     }
     function close() {
-      openPanel(null);
+      flash(null);
       setClass("vt-editing", false);
+      if (bar?.contains(document.activeElement)) document.getElementById("vt-edit-btn")?.focus();
     }
-    // Troca de idioma: recria a barra e reabre o painel atual, se houver
+    // Troca de idioma: recria o card mantendo a seção atual
     function relabel() {
       if (!bar) return;
       const wasOpen = html.classList.contains("vt-editing");
-      const last = current;
       bar.remove();
-      panel.remove();
-      current = null;
       bar = null;
-      if (wasOpen) {
-        build();
-        if (last) openPanel(last);
-      }
+      if (wasOpen) open();
     }
     return {
       relabel,

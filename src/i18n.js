@@ -14,7 +14,7 @@
     "button.aria": "Customize appearance",
 
     "editor.aria": "Vitro editor",
-    "editor.hint": "Click what you want to change",
+    "editor.hint": "Changes apply live · drag to move",
     "editor.done": "Done",
     "editor.enable": "Enable",
     "editor.close": "Close",
@@ -112,7 +112,7 @@
     "button.aria": "Personalizar aparência",
 
     "editor.aria": "Editor do Vitro",
-    "editor.hint": "Clique no que quer mudar",
+    "editor.hint": "As mudanças aparecem na hora · arraste para mover",
     "editor.done": "Pronto",
     "editor.enable": "Ativar",
     "editor.close": "Fechar",

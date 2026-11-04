@@ -35,7 +35,7 @@ After editing the code, click ↻ on the extension card and reload the YouTube t
 
 ## Usage
 
-- Click the **lightning bolt** ⚡ in YouTube's top bar to open the visual editor. Pick an area (Background, Highlight, Greeting…) and tweak it live. `Esc` or **Done** closes it.
+- Click the **lightning bolt** ⚡ in YouTube's top bar to open the visual editor, a floating glass card you can drag around. Pick an area (Background, Highlight, Greeting…) and tweak it live. `Esc` or **Done** closes it.
 
 ![Visual editor with the Background panel open](docs/editor.jpg)
 

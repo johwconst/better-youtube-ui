@@ -550,120 +550,242 @@ html.vt-no-merch #ticket-shelf {
    Editor visual
    ========================================================================= */
 
+/* Card flutuante centralizado (arrastável pelo cabeçalho) */
 #vt-editor {
+  --vt-ed-x: 0px;
+  --vt-ed-y: 0px;
   position: fixed;
   left: 50%;
-  bottom: 18px;
-  transform: translate(-50%, 140%);
+  top: 50%;
   z-index: 2147483000;
+  width: min(720px, calc(100vw - 32px));
+  height: min(540px, calc(100vh - 120px));
   display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 7px 7px 16px;
-  border-radius: 999px;
-  background: rgba(20, 20, 22, 0.78);
-  backdrop-filter: blur(20px) saturate(1.5);
-  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 28px;
+  background: rgba(18, 18, 20, 0.72);
+  backdrop-filter: blur(28px) saturate(1.6);
+  -webkit-backdrop-filter: blur(28px) saturate(1.6);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.75);
-  font: 500 12px/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.85), 0 12px 30px -12px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   color: #f1f1f1;
+  font: 400 12.5px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif;
+  transform: translate(calc(-50% + var(--vt-ed-x)), calc(-50% + var(--vt-ed-y))) scale(0.94);
   opacity: 0;
-  transition: transform 0.45s var(--vt-ease, ease), opacity 0.3s ease;
-  max-width: calc(100vw - 32px);
-  overflow-x: auto;
-  scrollbar-width: none;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.45s var(--vt-ease, ease), visibility 0s linear 0.45s;
 }
 html.vt-editing #vt-editor {
-  transform: translate(-50%, 0);
+  transform: translate(calc(-50% + var(--vt-ed-x)), calc(-50% + var(--vt-ed-y))) scale(1);
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.22s ease, transform 0.45s var(--vt-ease, ease), visibility 0s;
 }
-#vt-editor .vt-ed-label {
-  font-weight: 700;
-  margin-right: 6px;
-  white-space: nowrap;
+/* precisa vencer a especificidade de html.vt-editing #vt-editor */
+html.vt-editing #vt-editor.vt-dragging {
+  transition: none;
 }
-#vt-editor button,
-#vt-panel button {
+/* brilho sutil no topo do vidro */
+#vt-editor::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 120px;
+  background: radial-gradient(120% 100% at 50% 0%, rgba(255, 255, 255, 0.07), transparent 70%);
+  pointer-events: none;
+}
+#vt-editor button {
   font: inherit;
   color: inherit;
   cursor: pointer;
 }
-#vt-editor .vt-tab {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 999px;
-  padding: 8px 12px;
+
+#vt-editor .vt-ed-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+#vt-editor.vt-dragging .vt-ed-head {
+  cursor: grabbing;
+}
+#vt-editor .vt-ed-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+#vt-editor .vt-ed-logo {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  color: #fff;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--vt-accent, #ff4d4d) 85%, #fff), var(--vt-accent, #ff4d4d));
+  box-shadow: 0 6px 16px -6px var(--vt-accent, #ff4d4d);
+}
+#vt-editor .vt-ed-logo svg {
+  width: 18px;
+  height: 18px;
+}
+#vt-editor .vt-ed-brand strong {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+#vt-editor .vt-ed-label {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  opacity: 0.6;
   white-space: nowrap;
-  transition: background 0.2s ease;
-}
-#vt-editor .vt-tab:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-#vt-editor .vt-tab[aria-pressed="true"] {
-  background: #f1f1f1;
-  color: #0f0f0f;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 #vt-editor .vt-done {
+  flex: none;
   border: 0;
   background: var(--vt-accent, #ff4d4d);
   color: #fff !important;
   font-weight: 700;
   border-radius: 999px;
-  padding: 9px 16px;
-  margin-left: 6px;
+  padding: 9px 18px;
+  transition: transform 0.25s var(--vt-ease, ease), filter 0.2s ease;
+}
+#vt-editor .vt-done:hover {
+  filter: brightness(1.1);
+}
+#vt-editor .vt-done:active {
+  transform: scale(0.95);
 }
 
-#vt-panel {
-  position: fixed;
-  z-index: 2147483001;
-  bottom: 74px;
-  width: 300px;
-  max-height: calc(100vh - 180px);
+#vt-editor .vt-ed-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 196px 1fr;
+}
+
+/* Navegação lateral */
+#vt-editor .vt-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
   overflow-y: auto;
-  padding: 14px;
-  border-radius: 20px;
-  background: rgba(20, 20, 22, 0.86);
-  backdrop-filter: blur(24px) saturate(1.5);
-  -webkit-backdrop-filter: blur(24px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 24px 60px -14px rgba(0, 0, 0, 0.8);
-  color: #f1f1f1;
-  font: 400 12.5px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif;
-  display: none;
-  animation: vt-pop 0.35s var(--vt-ease, ease);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.12);
+  scrollbar-width: none;
+}
+#vt-editor .vt-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-radius: 12px;
+  padding: 9px 10px;
+  background: transparent;
+  color: rgba(241, 241, 241, 0.72) !important;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+#vt-editor .vt-tab svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  opacity: 0.8;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+#vt-editor .vt-tab:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff !important;
+}
+#vt-editor .vt-tab[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+#vt-editor .vt-tab[aria-pressed="true"] svg {
+  color: var(--vt-accent, #ff4d4d);
+  opacity: 1;
+}
+#vt-editor .vt-tab:focus-visible,
+#vt-editor .vt-done:focus-visible {
+  outline: 2px solid var(--vt-accent, #ff4d4d);
+  outline-offset: 2px;
+}
+
+/* Conteúdo da seção */
+#vt-panel {
+  overflow-y: auto;
+  padding: 18px 22px 22px;
   scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
-#vt-panel.vt-open {
-  display: block;
+#vt-panel > * {
+  animation: vt-fade 0.3s var(--vt-ease, ease) both;
 }
-@keyframes vt-pop {
+@keyframes vt-fade {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.97);
+    transform: translateY(6px);
   }
 }
+
+@media (max-width: 640px) {
+  #vt-editor {
+    height: min(620px, calc(100vh - 96px));
+  }
+  #vt-editor .vt-ed-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  #vt-editor .vt-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  #vt-editor .vt-tab {
+    width: auto;
+  }
+  #vt-editor .vt-ed-label {
+    display: none;
+  }
+}
+
 #vt-panel .vt-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 #vt-panel .vt-head h3 {
   margin: 0;
-  font-size: 13.5px;
+  font-size: 16px;
+  letter-spacing: -0.01em;
   font-weight: 700;
   flex: 1;
-}
-#vt-panel .vt-x {
-  border: 0;
-  background: none;
-  font-size: 16px;
-  opacity: 0.7;
-  padding: 2px 4px;
 }
 #vt-panel .vt-row {
   display: flex;
@@ -742,7 +864,7 @@ html.vt-editing #vt-editor {
 /* wallpapers */
 #vt-panel .vt-walls {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
   gap: 8px;
 }
 #vt-panel .vt-wall {
@@ -755,7 +877,7 @@ html.vt-editing #vt-editor {
 }
 #vt-panel .vt-wall i {
   display: block;
-  height: 44px;
+  height: 56px;
   border-radius: 8px;
   margin-bottom: 4px;
   background-size: cover;

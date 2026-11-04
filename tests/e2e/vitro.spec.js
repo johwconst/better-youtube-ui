@@ -163,6 +163,65 @@ test.describe("editor", () => {
     await expect.poll(() => cssOf(page.locator("#vt-wallpaper"), "backgroundImage")).toContain("rubi.jpg");
   });
 
+  test("abre como card centralizado já na primeira seção", async ({ yt }) => {
+    const page = await yt("/");
+    await page.locator("#vt-edit-btn").click();
+    const card = page.locator("#vt-editor");
+    await expect(card).toBeVisible();
+    await expect(page.locator('#vt-editor .vt-tab[data-id="fundo"]')).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("#vt-panel h3")).toHaveText("Background");
+    await expect(page.locator('#vt-editor .vt-tab[data-id="fundo"]')).toBeFocused();
+    // centro do card = centro da janela (espera a animação de entrada)
+    await expect
+      .poll(async () => {
+        const b = await card.boundingBox();
+        const vp = page.viewportSize();
+        return [Math.round(b.x + b.width / 2 - vp.width / 2), Math.round(b.y + b.height / 2 - vp.height / 2)];
+      })
+      .toEqual([0, 0]);
+    // fechar com "Done" esconde o card
+    await page.locator("#vt-editor .vt-done").click();
+    await expect(card).toBeHidden();
+  });
+
+  test("arrastar pelo cabeçalho move o card, sem sair da tela", async ({ yt }) => {
+    const page = await yt("/");
+    await page.locator("#vt-edit-btn").click();
+    const card = page.locator("#vt-editor");
+    await page.waitForTimeout(500); // animação de entrada
+    const before = await card.boundingBox();
+    const head = page.locator("#vt-editor .vt-ed-brand");
+    const hb = await head.boundingBox();
+    await page.mouse.move(hb.x + 10, hb.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(hb.x + 160, hb.y + 90, { steps: 5 });
+    await page.mouse.up();
+    const after = await card.boundingBox();
+    expect(Math.round(after.x - before.x)).toBe(150);
+    expect(Math.round(after.y - before.y)).toBe(80);
+    // arrastar muito longe trava na borda da janela
+    await page.mouse.move(hb.x + 160, hb.y + 90);
+    await page.mouse.down();
+    await page.mouse.move(hb.x + 5000, hb.y + 5000, { steps: 5 });
+    await page.mouse.up();
+    const edge = await card.boundingBox();
+    const vp = page.viewportSize();
+    expect(Math.round(edge.x + edge.width)).toBeLessThanOrEqual(vp.width);
+    expect(Math.round(edge.y + edge.height)).toBeLessThanOrEqual(vp.height);
+  });
+
+  test("setas do teclado navegam entre as seções", async ({ yt }) => {
+    const page = await yt("/");
+    await page.locator("#vt-edit-btn").click();
+    await expect(page.locator('#vt-editor .vt-tab[data-id="fundo"]')).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#vt-panel h3")).toHaveText("Highlight");
+    await expect(page.locator('#vt-editor .vt-tab[data-id="destaque"]')).toBeFocused();
+    await page.keyboard.press("ArrowUp");
+    await page.keyboard.press("ArrowUp"); // volta ao fim da lista
+    await expect(page.locator("#vt-panel h3")).toHaveText("Cleanup");
+  });
+
   test("slider de transparência muda a variável do vidro ao vivo", async ({ yt }) => {
     const page = await yt("/");
     await page.locator("#vt-edit-btn").click();

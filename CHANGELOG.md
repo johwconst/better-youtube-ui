@@ -15,10 +15,11 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - README em inglês (`README.md`) e em português (`README.pt-BR.md`), com links de troca.
 
 - Opção **Forçar tema escuro** (ligada por padrão), no painel Vidro e no popup: mantém a paleta escura do YouTube mesmo com a conta no tema claro; desligar devolve o tema original.
-- Testes: 36 unitários (`node:test`) e 21 E2E (Playwright no Chromium do sistema com YouTube falso). `npm test`, `npm run test:e2e`.
+- Testes: 36 unitários (`node:test`) e 24 E2E (Playwright no Chromium do sistema com YouTube falso). `npm test`, `npm run test:e2e`.
 
 ### Alterado
 - `scripts/release.sh` inclui `_locales/` no zip.
+- Editor visual virou um **card flutuante centralizado** de vidro: cabeçalho com o raio e "Pronto", seções com ícones na lateral e controles à direita. Abre na primeira seção, pode ser arrastado pelo cabeçalho (sem sair da tela), navega com as setas do teclado e vira faixa de chips em telas estreitas.
 - Lógica pura extraída para `src/core.js`.
 - Saudação agora fica no fluxo da página, dentro da grade da home e antes dos chips, alinhada aos cartões por `ResizeObserver`. Sem posicionamento absoluto, `padding-top` artificial nem temporizadores; espera a grade quando ela é montada depois.
 - Configurações salvas são saneadas (`vitroMerge`): chaves antigas e valores com tipo errado são descartados.
