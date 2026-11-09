@@ -347,6 +347,30 @@
   // ---------------------------------------------------------------------
   // Rotas do SPA do YouTube
   // ---------------------------------------------------------------------
+  // Filtro "Shorts" da busca: CSS não enxerga texto, então marcamos o botão com
+  // uma classe (quem esconde é html.vt-no-shorts no CSS). O YouTube reaproveita
+  // os botões entre buscas trocando só o texto, por isso a marcação é refeita a
+  // cada mudança, no máximo uma vez por quadro e só enquanto estiver na busca.
+  const searchChips = (() => {
+    let root = null, raf = 0;
+    const mark = () => {
+      raf = 0;
+      for (const chip of root?.querySelectorAll("yt-chip-cloud-chip-renderer") || [])
+        chip.classList.toggle("vt-shorts-chip", C.isShortsChip(chip.textContent));
+    };
+    const mo = new MutationObserver(() => (raf ||= requestAnimationFrame(mark)));
+    return {
+      sync(active) {
+        const next = active ? document.querySelector("ytd-search") : null;
+        if (next === root) return mark();
+        mo.disconnect();
+        root = next;
+        if (root) mo.observe(root, { childList: true, subtree: true, characterData: true });
+        mark();
+      },
+    };
+  })();
+
   function route() {
     redirectShorts();
     const page = C.pageOf(location.pathname);
@@ -357,6 +381,7 @@
     if (isWatch && S.enabled && S.room) room.start();
     else room.stop();
     if (isHome) updateHero();
+    searchChips.sync(page === "results");
   }
 
   document.addEventListener("yt-navigate-start", redirectShorts);
@@ -549,7 +574,11 @@
       },
       saudacao: {
         flash: "hero", master: "greet",
-        body: () => [text(t("opt.name"), "name", t("opt.namePlaceholder")), h("p", { class: "vt-hint" }, t("hint.name"))],
+        body: () => [
+          text(t("opt.name"), "name", t("opt.namePlaceholder")),
+          h("p", { class: "vt-hint" }, t("hint.name")),
+          seg(t("opt.greetAlign"), "greetAlign", [["left", t("opt.align.left")], ["center", t("opt.align.center")], ["right", t("opt.align.right")]]),
+        ],
       },
       menu: {
         flash: "guide", master: "sidebarGlass",

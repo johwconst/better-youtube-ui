@@ -46,6 +46,34 @@ test.describe("home", () => {
     for (const r of await page.locator(".vt-test-result").all()) await expect(r).toBeVisible();
   });
 
+  test("busca: esconde o filtro Shorts e acompanha os filtros que o YouTube troca", async ({ yt }) => {
+    const page = await yt("/results?search_query=teste");
+    const chip = (text) => page.locator(".vt-test-chip", { hasText: text });
+    await expect(chip("Shorts")).toBeHidden();
+    await expect(chip("All")).toBeVisible();
+    await expect(chip("Videos")).toBeVisible();
+
+    // o YouTube reaproveita o elemento e só troca o texto
+    await page.evaluate(() => {
+      const [, b, c] = document.querySelectorAll(".vt-test-chip .ytChipShapeText");
+      b.textContent = "Live";
+      c.textContent = "Shorts";
+    });
+    await expect(chip("Live")).toBeVisible();
+    await expect(chip("Shorts")).toBeHidden();
+  });
+
+  test("busca: o filtro Shorts volta quando a opção é desligada", async ({ yt, popup }) => {
+    const page = await yt("/results?search_query=teste");
+    await expect(page.locator(".vt-test-chip", { hasText: "Shorts" })).toBeHidden();
+    const p = await popup();
+    await p.evaluate(async () => {
+      const { settings = {} } = await chrome.storage.sync.get("settings");
+      await chrome.storage.sync.set({ settings: { ...settings, hideShorts: false } });
+    });
+    await expect(page.locator(".vt-test-chip", { hasText: "Shorts" })).toBeVisible();
+  });
+
   test("esconde Shorts e anúncios, mantém vídeos normais", async ({ yt }) => {
     const page = await yt("/");
     await expect(page.locator(".vt-test-shorts-shelf")).toBeHidden();
@@ -248,6 +276,52 @@ test.describe("editor", () => {
     // sem a saudação, os chips voltam para o topo do feed
     const header = await page.locator("#header.ytd-rich-grid-renderer").boundingBox();
     expect(header.y).toBeLessThan(150);
+  });
+});
+
+test.describe("saudação: alinhamento e espaço", () => {
+  const openGreeting = async (page) => {
+    await page.locator("#vt-edit-btn").click();
+    await page.locator('#vt-editor .vt-tab[data-id="saudacao"]').click();
+  };
+
+  test("ocupa a largura da grade mesmo se a grade centralizar os filhos", async ({ yt }) => {
+    const page = await yt("/");
+    await page.addStyleTag({ content: "ytd-rich-grid-renderer { align-items: center !important; }" });
+    const hero = await page.locator("#vt-hero").boundingBox();
+    const card = await page.locator(".vt-test-video").first().boundingBox();
+    expect(Math.abs(hero.x - card.x)).toBeLessThanOrEqual(1);
+  });
+
+  for (const [label, align] of [["Center", "center"], ["Right", "right"], ["Left", "left"]]) {
+    test(`alinhamento: ${align}`, async ({ yt }) => {
+      const page = await yt("/");
+      await openGreeting(page);
+      await page.locator("#vt-panel .vt-seg button", { hasText: label }).click();
+      const pos = await page.locator("#vt-hero").evaluate((hero) => {
+        const h = hero.getBoundingClientRect();
+        const r = hero.querySelector(".vt-hello").getBoundingClientRect();
+        return { left: r.left - h.left - parseFloat(getComputedStyle(hero).paddingLeft || 0), right: h.right - r.right, mid: r.left + r.width / 2 - (h.left + h.width / 2) };
+      });
+      if (align === "left") expect(pos.left).toBeLessThanOrEqual(1);
+      if (align === "right") expect(pos.right).toBeLessThanOrEqual(1);
+      if (align === "center") expect(Math.abs(pos.mid)).toBeLessThanOrEqual(2);
+      if (align === "left") await expect(page.locator("html")).not.toHaveClass(/vt-greet-(center|right)/);
+      else await expect(page.locator("html")).toHaveClass(new RegExp("vt-greet-" + align));
+    });
+  }
+
+  test("desligar a saudação remove o espaço dela e mantém o título da seção", async ({ yt }) => {
+    const page = await yt("/");
+    const before = (await page.locator("#header.ytd-rich-grid-renderer").boundingBox()).y;
+    await openGreeting(page);
+    await page.locator("#vt-panel .vt-head .vt-switch").click();
+    await expect(page.locator("#vt-hero .vt-greet")).toBeHidden();
+    await expect(page.locator("#vt-hero .vt-section")).toBeVisible();
+    const hero = await page.locator("#vt-hero").boundingBox();
+    expect(hero.height).toBeLessThan(90);
+    const after = (await page.locator("#header.ytd-rich-grid-renderer").boundingBox()).y;
+    expect(after).toBeLessThan(before - 200);
   });
 });
 

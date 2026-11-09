@@ -72,6 +72,11 @@ const shell = (page, { light = false } = {}) => `<!doctype html>
 export const searchPage = () =>
   shell(`
   <ytd-search>
+    <ytd-search-header-renderer>
+      <yt-chip-cloud-renderer><div id="chips">
+        ${["All", "Shorts", "Videos"].map((c) => `<yt-chip-cloud-chip-renderer class="vt-test-chip"><chip-shape><button role="tab"><div class="ytChipShapeChip"><div class="ytChipShapeText">${c}</div></div></button></chip-shape></yt-chip-cloud-chip-renderer>`).join("")}
+      </div></yt-chip-cloud-renderer>
+    </ytd-search-header-renderer>
     <ytd-section-list-renderer>
       <div id="contents" class="ytd-section-list-renderer">
         <ytd-item-section-renderer class="vt-test-section">

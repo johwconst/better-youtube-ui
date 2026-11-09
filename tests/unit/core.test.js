@@ -18,11 +18,11 @@ test("shortsTarget ignora o que não é Shorts", () => {
   }
 });
 
-test("pageOf identifica home, vídeo e o resto", () => {
+test("pageOf identifica home, vídeo, busca e o resto", () => {
   assert.equal(C.pageOf("/"), "home");
   assert.equal(C.pageOf("/feed/home"), "home");
   assert.equal(C.pageOf("/watch"), "watch");
-  assert.equal(C.pageOf("/results"), "other");
+  assert.equal(C.pageOf("/results"), "results");
   assert.equal(C.pageOf("/feed/subscriptions"), "other");
 });
 
@@ -153,4 +153,22 @@ test("fontes: classe só para fontes reais e com a extensão ligada", () => {
 
 test("escala da página vira variável CSS", () => {
   assert.equal(C.cssVars({ ...D, uiScale: 110 })["--vt-ui-scale"], "1.1");
+});
+
+test("isShortsChip reconhece só o rótulo exato do filtro", () => {
+  assert.equal(C.isShortsChip(" Shorts\n"), true);
+  assert.equal(C.isShortsChip("shorts"), true);
+  assert.equal(C.isShortsChip("Shorts engraçados"), false);
+  assert.equal(C.isShortsChip("Vídeos"), false);
+  assert.equal(C.isShortsChip(""), false);
+});
+
+test("htmlClasses: alinhamento da saudação é exclusivo e esquerda é o padrão", () => {
+  assert.equal(D.greetAlign, "left");
+  const def = C.htmlClasses(D);
+  assert.equal(def["vt-greet-center"] || def["vt-greet-right"], false);
+  const c = C.htmlClasses({ ...D, greetAlign: "center" });
+  assert.equal(c["vt-greet-center"], true);
+  assert.equal(c["vt-greet-right"], false);
+  assert.equal(C.htmlClasses({ ...D, greetAlign: "right" })["vt-greet-right"], true);
 });

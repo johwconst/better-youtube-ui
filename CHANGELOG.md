@@ -18,11 +18,14 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - **Fundo:** modos de papel de parede — fixo, dia e noite (18h–6h), um por dia e um por aba — e prévia ao passar o mouse nas miniaturas.
 - **Menu lateral:** escolher quais itens e seções aparecem (inscrições, histórico, playlists, assistir mais tarde, curtidos, seus vídeos, downloads, Mais do YouTube, Explorar, configurações, rodapé).
 - **Interface** (seção nova): fontes embutidas Inter, Manrope e Outfit (OFL, sem requisição externa), fonte do sistema ou do YouTube; escala da página; sons suaves sintetizados no editor.
+- **Saudação:** alinhamento à esquerda, ao centro ou à direita.
 - Roadmap no README (pt e en).
 - Testes: 45 unitários (`node:test`) e 33 E2E (Playwright no Chromium do sistema com YouTube falso). `npm test`, `npm run test:e2e`.
 
 ### Corrigido
+- **Saudação:** encolhia para a largura do texto e ficava centralizada quando a grade da home estava vazia; desligada, deixava um espaço vazio no lugar. Agora ocupa a largura dos cartões e, desligada, sobra só o título “Recomendados”.
 - **Busca:** a seção inteira de resultados sumia quando trazia uma prateleira de Shorts, deixando a página em carregamento infinito ou sem parte dos vídeos. Agora só a prateleira é escondida.
+- **Busca:** o filtro "Shorts" da barra de filtros agora some junto com os demais Shorts.
 
 ### Alterado
 - `scripts/release.sh` inclui `_locales/` no zip.

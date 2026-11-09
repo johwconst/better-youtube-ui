@@ -9,8 +9,12 @@
   function pageOf(pathname) {
     if (pathname === "/" || pathname === "" || pathname === "/feed/home") return "home";
     if (pathname === "/watch") return "watch";
+    if (pathname === "/results") return "results";
     return "other";
   }
+
+  // O filtro "Shorts" da busca não tem atributo próprio: só o texto o identifica
+  const isShortsChip = (text) => /^shorts$/i.test((text || "").trim());
 
   // Chave do dicionário para a saudação conforme a hora (0–23)
   function greetingKey(hour) {
@@ -56,6 +60,8 @@
       "vt-layout-dense": S.cardLayout === "dense",
       "vt-hero": on && S.hero,
       "vt-greet": S.greet,
+      "vt-greet-center": S.greetAlign === "center",
+      "vt-greet-right": S.greetAlign === "right",
       "vt-light": on && S.light,
       "vt-snow-on": on && S.hero && S.snow,
       "vt-room": on && S.room,
@@ -130,5 +136,5 @@
     return (S.enabled && S.forceDark) || !!originalDark;
   }
 
-  globalThis.VitroCore = { activeWallpaperId, isNight, localDay, wantsDark, shortsTarget, pageOf, greetingKey, heroHeight, glassParams, htmlClasses, cssVars, wallpaperCss };
+  globalThis.VitroCore = { activeWallpaperId, isNight, localDay, wantsDark, shortsTarget, pageOf, isShortsChip, greetingKey, heroHeight, glassParams, htmlClasses, cssVars, wallpaperCss };
 })();

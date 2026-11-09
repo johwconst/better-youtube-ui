@@ -27,6 +27,7 @@ globalThis.VITRO_DEFAULTS = {
   // Saudação
   greet: true,
   name: "",
+  greetAlign: "left", // left | center | right
 
   // Menu lateral
   sidebarGlass: true,
