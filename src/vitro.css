@@ -533,6 +533,33 @@ html.vt-no-ads tp-yt-paper-dialog:has(ytd-mealbar-promo-renderer) {
   display: none !important;
 }
 
+/* Vídeos só para membros. O selo usa a mesma classe "Commerce" de "Comprar ou
+   alugar" (filmes), mas só o de membros traz o ícone de estrela: é isso que o
+   separa, em qualquer idioma. Os seletores legados cobrem ytd-*-video-renderer. */
+html.vt-no-members ytd-rich-item-renderer:has(badge-shape.ytBadgeShapeCommerce > .ytBadgeShapeIcon),
+html.vt-no-members yt-lockup-view-model:has(badge-shape.ytBadgeShapeCommerce > .ytBadgeShapeIcon),
+html.vt-no-members ytd-rich-item-renderer:has(.badge-style-type-members-only),
+html.vt-no-members ytd-video-renderer:has(.badge-style-type-members-only),
+html.vt-no-members ytd-grid-video-renderer:has(.badge-style-type-members-only),
+html.vt-no-members ytd-compact-video-renderer:has(.badge-style-type-members-only),
+html.vt-no-members ytd-playlist-video-renderer:has(.badge-style-type-members-only) {
+  display: none !important;
+}
+
+/* Filmes à venda (YouTube Filmes) e canais pagos do Primetime. Na busca e na
+   página de Filmes eles têm cartões próprios (ytd-*movie-renderer). Em cartões
+   comuns, o selo "Comprar ou alugar" é Commerce com role="img"; o de membros
+   não tem role, então os dois filtros não se misturam. */
+html.vt-no-paid ytd-movie-renderer,
+html.vt-no-paid ytd-grid-movie-renderer,
+html.vt-no-paid ytd-compact-movie-renderer,
+html.vt-no-paid ytd-shelf-renderer:has(ytd-grid-movie-renderer),
+html.vt-no-paid ytd-shelf-renderer:has(ytd-grid-channel-renderer badge-shape.ytBadgeShapeCommerce),
+html.vt-no-paid ytd-rich-item-renderer:has(badge-shape.ytBadgeShapeCommerce[role="img"]),
+html.vt-no-paid yt-lockup-view-model:has(badge-shape.ytBadgeShapeCommerce[role="img"]) {
+  display: none !important;
+}
+
 /* Recomendados na página de vídeo */
 html.vt-no-related.vt-watch #secondary #related,
 html.vt-no-related.vt-watch #secondary ytd-watch-next-secondary-results-renderer {

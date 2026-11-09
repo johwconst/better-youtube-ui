@@ -279,6 +279,46 @@ test.describe("editor", () => {
   });
 });
 
+test.describe("vídeos só para membros", () => {
+  test("ficam visíveis por padrão e somem com a opção da Limpeza; filmes pagos ficam", async ({ yt }) => {
+    const page = await yt("/");
+    await expect(page.locator(".vt-test-members")).toBeVisible();
+    await page.locator("#vt-edit-btn").click();
+    await page.locator('#vt-editor .vt-tab[data-id="limpeza"]').click();
+    await page.locator('#vt-panel .vt-switch[aria-label="Hide members-only videos"]').click();
+    await expect(page.locator("html")).toHaveClass(/vt-no-members/);
+    await expect(page.locator(".vt-test-members")).toBeHidden();
+    await expect(page.locator(".vt-test-paid-movie")).toBeVisible();
+    await expect(page.locator(".vt-test-video").first()).toBeVisible();
+  });
+});
+
+test.describe("filmes à venda", () => {
+  const enable = async (page) => {
+    await page.locator("#vt-edit-btn").click();
+    await page.locator('#vt-editor .vt-tab[data-id="limpeza"]').click();
+    await page.locator('#vt-panel .vt-switch[aria-label="Hide movies for sale"]').click();
+    await expect(page.locator("html")).toHaveClass(/vt-no-paid/);
+  };
+
+  test("home: somem com a opção; vídeos de membros e normais ficam", async ({ yt }) => {
+    const page = await yt("/");
+    await expect(page.locator(".vt-test-paid-movie")).toBeVisible();
+    await enable(page);
+    await expect(page.locator(".vt-test-paid-movie")).toBeHidden();
+    await expect(page.locator(".vt-test-members")).toBeVisible();
+    await expect(page.locator(".vt-test-video").first()).toBeVisible();
+  });
+
+  test("busca: o cartão de filme some, os resultados ficam", async ({ yt }) => {
+    const page = await yt("/results?search_query=dune");
+    await expect(page.locator(".vt-test-search-movie")).toBeVisible();
+    await enable(page);
+    await expect(page.locator(".vt-test-search-movie")).toBeHidden();
+    await expect(page.locator(".vt-test-result").first()).toBeVisible();
+  });
+});
+
 test.describe("saudação: alinhamento e espaço", () => {
   const openGreeting = async (page) => {
     await page.locator("#vt-edit-btn").click();

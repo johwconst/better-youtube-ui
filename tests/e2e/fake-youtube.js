@@ -28,7 +28,7 @@ const shell = (page, { light = false } = {}) => `<!doctype html>
   ytd-app, ytd-page-manager, ytd-browse, ytd-masthead,
   ytd-rich-item-renderer, ytd-rich-section-renderer, ytd-watch-flexy,
   ytd-search, ytd-section-list-renderer, ytd-item-section-renderer, ytd-video-renderer,
-  grid-shelf-view-model { display: block; }
+  grid-shelf-view-model, ytd-movie-renderer { display: block; }
   #masthead-container { position: fixed; top: 0; left: 0; right: 0; height: 56px; z-index: 2020; }
   #container.ytd-masthead { display: flex; justify-content: space-between; align-items: center; height: 56px; }
   #page-manager { display: block; margin-left: 240px; }
@@ -86,6 +86,11 @@ export const searchPage = () =>
             <ytd-video-renderer class="vt-test-result"><a href="/watch?v=abc123def46">Result 2</a></ytd-video-renderer>
           </div>
         </ytd-item-section-renderer>
+        <ytd-item-section-renderer>
+          <div id="contents" class="ytd-item-section-renderer">
+            <ytd-movie-renderer class="vt-test-search-movie"><a href="/watch?v=m0v1e000001">Dune · YouTube Movies · Buy or rent</a></ytd-movie-renderer>
+          </div>
+        </ytd-item-section-renderer>
         <ytd-continuation-item-renderer>Loading</ytd-continuation-item-renderer>
       </div>
     </ytd-section-list-renderer>
@@ -110,6 +115,18 @@ export const homePage = ({ light = false } = {}) =>
         </ytd-rich-section-renderer>
         <ytd-rich-item-renderer class="vt-test-short-item"><a href="/shorts/xyz987654">A short</a></ytd-rich-item-renderer>
         ${lockup("Normal video 3")}
+        <ytd-rich-item-renderer class="vt-test-members">
+          <yt-lockup-view-model><div class="ytLockupViewModelHost"><a href="/watch?v=memb3rs0nly">Members video</a>
+            <yt-content-metadata-view-model><div class="ytContentMetadataViewModelBadge"><yt-badge-view-model>
+              <badge-shape class="ytBadgeShapeHost ytBadgeShapeCommerce"><div class="ytBadgeShapeIcon">★</div><div class="ytBadgeShapeText">Members only</div></badge-shape>
+            </yt-badge-view-model></div></yt-content-metadata-view-model>
+          </div></yt-lockup-view-model>
+        </ytd-rich-item-renderer>
+        <ytd-rich-item-renderer class="vt-test-paid-movie">
+          <yt-lockup-view-model><div class="ytLockupViewModelHost"><a href="/watch?v=m0v1e000000">Movie</a>
+            <badge-shape class="ytBadgeShapeHost ytBadgeShapeCommerce" role="img" aria-label="Buy or rent"><div class="ytBadgeShapeText">Buy or rent</div></badge-shape>
+          </div></yt-lockup-view-model>
+        </ytd-rich-item-renderer>
       </div>
     </ytd-rich-grid-renderer>
   </ytd-browse>`, { light });

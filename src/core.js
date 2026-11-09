@@ -52,6 +52,8 @@
       "vt-no-related": on && S.hideRelated,
       "vt-no-endscreens": on && S.hideEndscreens,
       "vt-no-merch": on && S.hideMerch,
+      "vt-no-members": on && S.hideMembers,
+      "vt-no-paid": on && S.hidePaid,
       "vt-sidebar-glass": on && S.sidebarGlass,
       "vt-cards": on && S.cards,
       "vt-card-over": S.cardTitle === "over",

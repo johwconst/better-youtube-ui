@@ -18,6 +18,8 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - **Fundo:** modos de papel de parede — fixo, dia e noite (18h–6h), um por dia e um por aba — e prévia ao passar o mouse nas miniaturas.
 - **Menu lateral:** escolher quais itens e seções aparecem (inscrições, histórico, playlists, assistir mais tarde, curtidos, seus vídeos, downloads, Mais do YouTube, Explorar, configurações, rodapé).
 - **Interface** (seção nova): fontes embutidas Inter, Manrope e Outfit (OFL, sem requisição externa), fonte do sistema ou do YouTube; escala da página; sons suaves sintetizados no editor.
+- **Limpeza:** opção para esconder vídeos “Só para membros” (desligada por padrão), no editor e no popup.
+- **Limpeza:** opção para esconder filmes à venda (“Comprar ou alugar”) e canais pagos do Primetime (desligada por padrão), no editor e no popup.
 - **Saudação:** alinhamento à esquerda, ao centro ou à direita.
 - Roadmap no README (pt e en).
 - Testes: 45 unitários (`node:test`) e 33 E2E (Playwright no Chromium do sistema com YouTube falso). `npm test`, `npm run test:e2e`.

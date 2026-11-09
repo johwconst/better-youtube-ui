@@ -97,6 +97,8 @@
     "opt.blockAds": "Block ads",
     "opt.hideEndscreens": "Hide end screens",
     "opt.hideMerch": "Hide products/merch",
+    "opt.hideMembers": "Hide members-only videos",
+    "opt.hidePaid": "Hide movies for sale",
 
     "popup.tagline": "YouTube in glass",
     "popup.toggle": "Enable Vitro",
@@ -227,6 +229,8 @@
     "opt.blockAds": "Bloquear anúncios",
     "opt.hideEndscreens": "Esconder telas finais",
     "opt.hideMerch": "Esconder produtos/merch",
+    "opt.hideMembers": "Esconder vídeos só para membros",
+    "opt.hidePaid": "Esconder filmes à venda",
 
     "popup.tagline": "YouTube em vidro",
     "popup.toggle": "Ativar Vitro",

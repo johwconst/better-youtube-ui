@@ -63,6 +63,20 @@ test("htmlClasses: padrões ligam o tema e a limpeza", () => {
   assert.equal(!!cls["vt-snow-on"], false);
 });
 
+test("htmlClasses: esconder vídeos só para membros é opcional e respeita o liga/desliga", () => {
+  assert.equal(D.hideMembers, false);
+  assert.equal(!!C.htmlClasses(D)["vt-no-members"], false);
+  assert.equal(C.htmlClasses({ ...D, hideMembers: true })["vt-no-members"], true);
+  assert.equal(!!C.htmlClasses({ ...D, hideMembers: true, enabled: false })["vt-no-members"], false);
+});
+
+test("htmlClasses: esconder filmes à venda é opcional e respeita o liga/desliga", () => {
+  assert.equal(D.hidePaid, false);
+  assert.equal(!!C.htmlClasses(D)["vt-no-paid"], false);
+  assert.equal(C.htmlClasses({ ...D, hidePaid: true })["vt-no-paid"], true);
+  assert.equal(!!C.htmlClasses({ ...D, hidePaid: true, enabled: false })["vt-no-paid"], false);
+});
+
 test("htmlClasses: neve depende do destaque", () => {
   assert.equal(!!C.htmlClasses({ ...D, snow: true, hero: false })["vt-snow-on"], false);
   assert.equal(!!C.htmlClasses({ ...D, snow: true, hero: true })["vt-snow-on"], true);
