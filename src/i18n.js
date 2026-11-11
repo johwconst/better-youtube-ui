@@ -99,6 +99,7 @@
     "opt.hideMerch": "Hide products/merch",
     "opt.hideMembers": "Hide members-only videos",
     "opt.hidePaid": "Hide movies for sale",
+    "opt.hideGames": "Hide Playables",
 
     "popup.tagline": "YouTube in glass",
     "popup.toggle": "Enable Vitro",
@@ -231,6 +232,7 @@
     "opt.hideMerch": "Esconder produtos/merch",
     "opt.hideMembers": "Esconder vídeos só para membros",
     "opt.hidePaid": "Esconder filmes à venda",
+    "opt.hideGames": "Esconder Sala de Jogos",
 
     "popup.tagline": "YouTube em vidro",
     "popup.toggle": "Ativar Vitro",

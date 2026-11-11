@@ -560,6 +560,20 @@ html.vt-no-paid yt-lockup-view-model:has(badge-shape.ytBadgeShapeCommerce[role="
   display: none !important;
 }
 
+/* Sala de Jogos (Playables): prateleiras e cards fora da própria página de
+   jogos (lá, esvaziar a grade faria o YouTube carregar mais sem parar) e o
+   atalho do menu lateral. Identificados pelo card e pelo link /playables. */
+html.vt-no-games ytd-rich-section-renderer:has(ytd-mini-game-card-view-model),
+html.vt-no-games ytd-rich-section-renderer:has(a[href^="/playables"]),
+html.vt-no-games ytd-browse:not([page-subtype="playables"]) ytd-rich-item-renderer:has(ytd-mini-game-card-view-model),
+html.vt-no-games ytd-browse:not([page-subtype="playables"]) ytd-mini-game-card-view-model,
+html.vt-no-games grid-shelf-view-model:has(a[href^="/playables"]),
+html.vt-no-games yt-lockup-view-model:has(a[href^="/playables"]),
+html.vt-no-games ytd-guide-entry-renderer:has(a[href^="/playables"]),
+html.vt-no-games ytd-mini-guide-entry-renderer:has(a[href^="/playables"]) {
+  display: none !important;
+}
+
 /* Recomendados na página de vídeo */
 html.vt-no-related.vt-watch #secondary #related,
 html.vt-no-related.vt-watch #secondary ytd-watch-next-secondary-results-renderer {

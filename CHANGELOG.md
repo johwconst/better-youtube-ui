@@ -19,6 +19,7 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - **Menu lateral:** escolher quais itens e seções aparecem (inscrições, histórico, playlists, assistir mais tarde, curtidos, seus vídeos, downloads, Mais do YouTube, Explorar, configurações, rodapé).
 - **Interface** (seção nova): fontes embutidas Inter, Manrope e Outfit (OFL, sem requisição externa), fonte do sistema ou do YouTube; escala da página; sons suaves sintetizados no editor.
 - **Limpeza:** opção para esconder vídeos “Só para membros” (desligada por padrão), no editor e no popup.
+- **Limpeza:** opção para esconder a Sala de Jogos (Playables): prateleira da home e atalho do menu (desligada por padrão), no editor e no popup.
 - **Limpeza:** opção para esconder filmes à venda (“Comprar ou alugar”) e canais pagos do Primetime (desligada por padrão), no editor e no popup.
 - **Saudação:** alinhamento à esquerda, ao centro ou à direita.
 - Roadmap no README (pt e en).

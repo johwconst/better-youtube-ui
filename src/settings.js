@@ -12,6 +12,7 @@ globalThis.VITRO_DEFAULTS = {
   hideMerch: true,
   hideMembers: false, // vídeos "Só para membros"
   hidePaid: false, // filmes à venda e canais pagos (Primetime)
+  hideGames: false, // Sala de Jogos (Playables)
 
   // Fundo
   wallpaper: "brasa", // id de VITRO_WALLPAPERS ou "custom"

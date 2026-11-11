@@ -293,6 +293,22 @@ test.describe("vídeos só para membros", () => {
   });
 });
 
+test.describe("sala de jogos", () => {
+  test("a prateleira e o atalho do menu somem com a opção; o resto fica", async ({ yt }) => {
+    const page = await yt("/");
+    await expect(page.locator(".vt-test-games-shelf")).toBeVisible();
+    await expect(page.locator(".vt-test-guide-games")).toBeVisible();
+    await page.locator("#vt-edit-btn").click();
+    await page.locator('#vt-editor .vt-tab[data-id="limpeza"]').click();
+    await page.locator('#vt-panel .vt-switch[aria-label="Hide Playables"]').click();
+    await expect(page.locator("html")).toHaveClass(/vt-no-games/);
+    await expect(page.locator(".vt-test-games-shelf")).toBeHidden();
+    await expect(page.locator(".vt-test-guide-games")).toBeHidden();
+    await expect(page.locator(".vt-test-video").first()).toBeVisible();
+    await expect(page.locator(".vt-test-guide-home")).toBeVisible();
+  });
+});
+
 test.describe("filmes à venda", () => {
   const enable = async (page) => {
     await page.locator("#vt-edit-btn").click();

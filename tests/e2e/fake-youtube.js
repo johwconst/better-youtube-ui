@@ -51,6 +51,7 @@ const shell = (page, { light = false } = {}) => `<!doctype html>
         <ytd-guide-section-renderer>
           <ytd-guide-entry-renderer class="vt-test-guide-home" active><a title="Home" href="/">Home</a></ytd-guide-entry-renderer>
           <ytd-guide-entry-renderer class="vt-test-guide-shorts"><a title="Shorts" href="/shorts/">Shorts</a></ytd-guide-entry-renderer>
+          <ytd-guide-entry-renderer class="vt-test-guide-games"><a title="Playables" href="/playables">Playables</a></ytd-guide-entry-renderer>
         </ytd-guide-section-renderer>
         <ytd-guide-section-renderer class="vt-test-guide-subs"><a href="/feed/subscriptions">Subscriptions</a></ytd-guide-section-renderer>
         <ytd-guide-section-renderer>
@@ -115,6 +116,11 @@ export const homePage = ({ light = false } = {}) =>
         </ytd-rich-section-renderer>
         <ytd-rich-item-renderer class="vt-test-short-item"><a href="/shorts/xyz987654">A short</a></ytd-rich-item-renderer>
         ${lockup("Normal video 3")}
+        <ytd-rich-section-renderer class="vt-test-games-shelf">
+          <ytd-rich-shelf-renderer><h2>Playables</h2>
+            <ytd-rich-item-renderer is-mini-game-card-shelf><ytd-mini-game-card-view-model><a href="/playables/UgkxTest123">Game</a></ytd-mini-game-card-view-model></ytd-rich-item-renderer>
+          </ytd-rich-shelf-renderer>
+        </ytd-rich-section-renderer>
         <ytd-rich-item-renderer class="vt-test-members">
           <yt-lockup-view-model><div class="ytLockupViewModelHost"><a href="/watch?v=memb3rs0nly">Members video</a>
             <yt-content-metadata-view-model><div class="ytContentMetadataViewModelBadge"><yt-badge-view-model>

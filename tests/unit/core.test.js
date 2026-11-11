@@ -77,6 +77,13 @@ test("htmlClasses: esconder filmes à venda é opcional e respeita o liga/deslig
   assert.equal(!!C.htmlClasses({ ...D, hidePaid: true, enabled: false })["vt-no-paid"], false);
 });
 
+test("htmlClasses: esconder a Sala de Jogos é opcional e respeita o liga/desliga", () => {
+  assert.equal(D.hideGames, false);
+  assert.equal(!!C.htmlClasses(D)["vt-no-games"], false);
+  assert.equal(C.htmlClasses({ ...D, hideGames: true })["vt-no-games"], true);
+  assert.equal(!!C.htmlClasses({ ...D, hideGames: true, enabled: false })["vt-no-games"], false);
+});
+
 test("htmlClasses: neve depende do destaque", () => {
   assert.equal(!!C.htmlClasses({ ...D, snow: true, hero: false })["vt-snow-on"], false);
   assert.equal(!!C.htmlClasses({ ...D, snow: true, hero: true })["vt-snow-on"], true);
