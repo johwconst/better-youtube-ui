@@ -529,7 +529,10 @@ html.vt-no-ads .ytp-ad-overlay-container,
 html.vt-no-ads .ytp-ad-image-overlay,
 html.vt-no-ads ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"],
 html.vt-no-ads ytd-mealbar-promo-renderer,
-html.vt-no-ads tp-yt-paper-dialog:has(ytd-mealbar-promo-renderer) {
+html.vt-no-ads tp-yt-paper-dialog:has(ytd-mealbar-promo-renderer),
+html.vt-no-ads ytd-enforcement-message-view-model,
+html.vt-no-ads tp-yt-paper-dialog:has(ytd-enforcement-message-view-model),
+html.vt-no-ads #error-screen:has(ytd-enforcement-message-view-model) {
   display: none !important;
 }
 

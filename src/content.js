@@ -391,8 +391,24 @@
   // ---------------------------------------------------------------------
   // Anúncios em vídeo: pula / acelera
   // ---------------------------------------------------------------------
+  // Aviso "Bloqueadores de anúncios são proibidos": vem como diálogo (pausa o
+  // vídeo) ou dentro do player (#error-screen). Remove e retoma a reprodução
+  // uma vez, sem brigar com uma pausa feita pelo usuário depois.
+  function dismissAdblockWall() {
+    const msg = document.querySelector("ytd-enforcement-message-view-model");
+    if (!msg) return;
+    const box = msg.closest("tp-yt-paper-dialog, #error-screen") || msg;
+    if (box.id === "error-screen") box.replaceChildren();
+    else box.remove();
+    document.querySelectorAll("tp-yt-iron-overlay-backdrop").forEach((b) => b.remove());
+    document.body.style.removeProperty("overflow");
+    const v = document.querySelector("#movie_player video");
+    if (v && v.paused && !v.ended) v.play().catch(() => {});
+  }
+
   function adTick() {
     if (!S.enabled || !S.blockAds) return;
+    dismissAdblockWall();
     const player = document.querySelector("#movie_player");
     if (!player) return;
     const skip = player.querySelector(

@@ -21,6 +21,7 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - **Limpeza:** opção para esconder vídeos “Só para membros” (desligada por padrão), no editor e no popup.
 - **Limpeza:** opção para esconder a Sala de Jogos (Playables): prateleira da home e atalho do menu (desligada por padrão), no editor e no popup.
 - **Limpeza:** opção para esconder filmes à venda (“Comprar ou alugar”) e canais pagos do Primetime (desligada por padrão), no editor e no popup.
+- **Limpeza:** com "Bloquear anúncios" ligado, o aviso "Bloqueadores de anúncios são proibidos" é escondido/removido e o vídeo volta a tocar quando possível.
 - **Saudação:** alinhamento à esquerda, ao centro ou à direita.
 - Roadmap no README (pt e en).
 - Testes: 45 unitários (`node:test`) e 33 E2E (Playwright no Chromium do sistema com YouTube falso). `npm test`, `npm run test:e2e`.
